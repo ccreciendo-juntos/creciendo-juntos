@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ShoppingCart, User, LogOut, Award, Plus, Trash2, 
-  Upload, Search, ArrowRight, Users, Layers, QrCode, TrendingUp, Check, FileDown
+  Upload, Search, ArrowRight, QrCode, TrendingUp, Check, FileDown,
+  MessageSquare, Play, Star, GraduationCap, CheckCircle, Flame, Phone
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { jsPDF } from 'jspdf';
@@ -45,6 +46,28 @@ interface CartItem {
 export default function App() {
   // Navigation State
   const [currentView, setCurrentView] = useState<'landing' | 'catalog' | 'cart' | 'checkout' | 'verify-cert' | 'dashboard'>('landing');
+  
+  // Landing Page Interactive State
+  const [waInteractions, setWaInteractions] = useState(() => parseInt(localStorage.getItem('wa_interactions') || '387'));
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<Array<{ sender: 'bot' | 'user', text: string }>>([
+    { sender: 'bot', text: '¡Hola! Bienvenido a la Colección Creciendo Juntos. ¿En qué podemos ayudarte hoy? 😊' }
+  ]);
+  const [activeReelIndex, setActiveReelIndex] = useState<number | null>(null);
+  
+  const handleChatOption = (option: string, reply: string) => {
+    setChatMessages(prev => [...prev, { sender: 'user', text: option }]);
+    setTimeout(() => {
+      setChatMessages(prev => [...prev, { sender: 'bot', text: reply }]);
+    }, 600);
+  };
+
+  const handleWaClick = () => {
+    const newCount = waInteractions + 1;
+    setWaInteractions(newCount);
+    localStorage.setItem('wa_interactions', newCount.toString());
+    window.open('https://wa.me/51999999999?text=Hola,%20deseo%20información%20sobre%20la%20Colección%20Creciendo%20Juntos', '_blank');
+  };
   
   // Auth State
   const [user, setUser] = useState<UserData | null>(null);
@@ -917,48 +940,279 @@ export default function App() {
       <main className="flex-1 py-8">
         <div className="container mx-auto px-6">
           {currentView === 'landing' && (
-            <div className="space-y-12 animate-fade-in">
-              {/* HERO SECTION */}
-              <div className="glass-panel flex flex-col md:flex-row gap-8 p-8 md:p-12 items-center bg-gradient-to-br from-white to-primary-light/40">
-                <div className="flex-1 space-y-6">
-                  <span className="bg-primary-light text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Colección Creciendo Juntos</span>
-                  <h2 className="text-4xl md:text-5xl font-black text-primary-dark leading-tight">Formando valores morales y cívicos con excelencia</h2>
-                  <p className="text-gray-600 text-lg">Plataforma integral para colegios, docentes y alumnos de educación religiosa de 1° a 5° de secundaria. Libros impresos, digitales y aula virtual interactiva en un solo lugar.</p>
-                  
-                  {/* Doctrinal Quote from Uploaded Image */}
-                  <div className="border-l-4 border-accent pl-4 py-1.5 italic bg-amber-50/70 rounded-r-lg text-slate-800">
-                    <p className="text-sm font-medium">"Crean lo que aprenden, enseñen lo que creen y practiquen lo que enseñan."</p>
-                    <span className="text-[11px] text-gray-500 block mt-0.5">— San Agustín</span>
-                  </div>
+            <div className="space-y-16 animate-fade-in pb-16">
+              {/* URGENCY & TRUST BANNER */}
+              <div className="bg-amber-500 text-white font-bold py-2.5 px-4 text-center rounded-xl flex items-center justify-center gap-2 text-xs md:text-sm animate-pulse shadow-md">
+                <Flame className="w-4 h-4 fill-white" />
+                <span>¡OFERTA EXCLUSIVA 2026! 20% de descuento en licencias digitales y capacitaciones pedagógicas esta semana.</span>
+              </div>
 
-                  <div className="flex flex-wrap gap-4">
-                    <button className="btn btn-primary" onClick={() => setCurrentView('catalog')}>Explorar Libros <ArrowRight className="w-4 h-4 ml-2" /></button>
-                    <button className="btn btn-secondary" onClick={() => { setAuthMode('register'); setShowAuthModal(true); }}>Registrarme como Docente</button>
+              {/* HERO SECTION */}
+              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900 via-primary-dark to-teal-950 text-white p-8 md:p-16 shadow-premium">
+                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                <div className="relative z-10 flex flex-col lg:flex-row items-center gap-12">
+                  <div className="flex-1 space-y-8">
+                    <span className="inline-flex items-center gap-1.5 bg-teal-400/20 text-teal-300 px-4 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-widest border border-teal-500/30">
+                      <GraduationCap className="w-3.5 h-3.5" /> Educación Religiosa Secundaria
+                    </span>
+                    <h2 className="text-4xl md:text-6xl font-black leading-tight tracking-tight">
+                      Formando valores cívicos y morales <span className="text-yellow-400">con excelencia</span>
+                    </h2>
+                    <p className="text-gray-300 text-lg md:text-xl font-light leading-relaxed max-w-2xl">
+                      La solución pedagógica integral preferida por más de 150 colegios. Libros interactivos estructurados, guías metodológicas docentes y aula virtual en una sola plataforma serverless de alta velocidad.
+                    </p>
+                    
+                    {/* Doctrinal Quote Banner */}
+                    <div className="border-l-4 border-yellow-400 pl-4 py-2 italic bg-white/5 rounded-r-2xl max-w-xl">
+                      <p className="text-sm md:text-base text-gray-200">"Crean lo que aprenden, enseñen lo que creen y practiquen lo que enseñan."</p>
+                      <span className="text-xs text-yellow-400/80 block mt-1 font-semibold">— San Agustín</span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-4 pt-2">
+                      <button className="btn btn-primary bg-yellow-500 hover:bg-yellow-400 text-gray-900 border-none shadow-lg px-8 py-3.5 font-extrabold text-sm md:text-base flex items-center gap-2 transform hover:-translate-y-0.5 transition-all animate-bounce" onClick={() => setCurrentView('catalog')}>
+                        Comprar Cuadernos <ArrowRight className="w-5 h-5" />
+                      </button>
+                      <button className="btn border border-white/30 bg-white/10 hover:bg-white/20 text-white px-8 py-3.5 font-bold text-sm md:text-base rounded-xl transform hover:-translate-y-0.5 transition-all" onClick={() => { setAuthMode('register'); setShowAuthModal(true); }}>
+                        Registrarme como Docente
+                      </button>
+                    </div>
                   </div>
-                </div>
-                <div className="w-full md:w-1/3 flex justify-center">
-                  <img src="https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?q=80&w=400&auto=format&fit=crop" alt="Libro" className="w-64 h-80 object-cover rounded-2xl shadow-premium transform hover:scale-105 transition-transform duration-300" />
+                  <div className="w-full lg:w-2/5 flex justify-center relative">
+                    <div className="absolute -inset-4 bg-teal-500/20 rounded-full blur-3xl"></div>
+                    <img 
+                      src="https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?q=80&w=500&auto=format&fit=crop" 
+                      alt="Colección Creciendo Juntos Libros" 
+                      className="relative z-10 w-72 md:w-80 h-96 object-cover rounded-2xl shadow-2xl border-4 border-white/10 transform hover:rotate-2 hover:scale-105 transition-all duration-500" 
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* FEATURES GRID */}
-              <h3 className="text-3xl font-black text-center text-gray-800">¿Qué ofrecemos en la Colección?</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="glass-panel p-8 hover:shadow-premium transition-shadow duration-300">
-                  <Layers className="w-10 h-10 text-primary mb-4" />
-                  <h4 className="font-bold text-xl mb-2 text-gray-800">Libros Físicos y Digitales</h4>
-                  <p className="text-gray-600 text-sm">Cuadernos de trabajo interactivos que integran doctrina, actividades y autoevaluación adaptados al currículo escolar nacional.</p>
+              {/* STATS / TRUST LOGROS */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {[
+                  { value: "15,000+", label: "Estudiantes formados" },
+                  { value: "350+", label: "Docentes certificados" },
+                  { value: "120+", label: "Colegios afiliados" },
+                  { value: "99.2%", label: "Satisfacción docente" }
+                ].map((stat, i) => (
+                  <div key={i} className="glass-panel text-center p-6 bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="text-3xl md:text-4xl font-black text-primary-dark">{stat.value}</div>
+                    <div className="text-xs md:text-sm text-gray-500 mt-1 font-medium">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* REELS / VIDEO CLIPS INTERACTIVOS */}
+              <div className="space-y-6">
+                <div className="text-center md:text-left space-y-2">
+                  <h3 className="text-3xl font-black text-gray-800 tracking-tight">Experiencia Creciendo Juntos en Acción</h3>
+                  <p className="text-gray-500 max-w-xl">Observa pequeños fragmentos de nuestras sesiones dinámicas y testimonios en video.</p>
                 </div>
-                <div className="glass-panel p-8 hover:shadow-premium transition-shadow duration-300">
-                  <Users className="w-10 h-10 text-primary mb-4" />
-                  <h4 className="font-bold text-xl mb-2 text-gray-800">Gestión de Aulas Virtuales</h4>
-                  <p className="text-gray-600 text-sm">Los docentes pueden crear clases, matricular a sus alumnos, asignar lecciones y hacer seguimiento de notas en tiempo real.</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  {[
+                    { title: "Metodología Dinámica", duration: "1:20 min", bg: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=400&auto=format&fit=crop", video: "https://www.w3schools.com/html/mov_bbb.mp4" },
+                    { title: "Aula Virtual Activa", duration: "0:45 min", bg: "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?q=80&w=400&auto=format&fit=crop", video: "https://www.w3schools.com/html/mov_bbb.mp4" },
+                    { title: "Testimonio del Colegio", duration: "2:05 min", bg: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=400&auto=format&fit=crop", video: "https://www.w3schools.com/html/mov_bbb.mp4" }
+                  ].map((reel, index) => (
+                    <div key={index} className="group relative overflow-hidden rounded-2xl aspect-[9/16] bg-slate-900 shadow-lg cursor-pointer transform hover:-translate-y-2 transition-all duration-300" onClick={() => setActiveReelIndex(index)}>
+                      <img src={reel.bg} alt={reel.title} className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-500" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-90"></div>
+                      
+                      {/* Play Button Icon Overlay */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-16 h-16 bg-white/25 group-hover:bg-white/40 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-all transform group-hover:scale-110">
+                          <Play className="w-7 h-7 fill-white ml-1" />
+                        </div>
+                      </div>
+                      
+                      {/* Reel Metadata */}
+                      <div className="absolute bottom-4 left-4 right-4 text-white space-y-1">
+                        <div className="text-xs text-teal-400 font-bold uppercase tracking-wider">{reel.duration}</div>
+                        <h4 className="font-extrabold text-base leading-tight">{reel.title}</h4>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="glass-panel p-8 hover:shadow-premium transition-shadow duration-300">
-                  <Award className="w-10 h-10 text-primary mb-4" />
-                  <h4 className="font-bold text-xl mb-2 text-gray-800">Certificación Digital QR</h4>
-                  <p className="text-gray-600 text-sm">Acceso a seminarios metodológicos para docentes con descarga automática de certificado PDF validado con código QR único.</p>
+              </div>
+
+              {/* REELS VIDEO LIGHTBOX MODAL */}
+              {activeReelIndex !== null && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+                  <div className="relative w-full max-w-md bg-black rounded-3xl overflow-hidden shadow-2xl animate-scale-up">
+                    <button className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white text-xl flex items-center justify-center" onClick={() => setActiveReelIndex(null)}>×</button>
+                    <video 
+                      controls 
+                      autoPlay 
+                      className="w-full aspect-[9/16] object-cover" 
+                      src="https://www.w3schools.com/html/mov_bbb.mp4"
+                    ></video>
+                  </div>
                 </div>
+              )}
+
+              {/* PRODUCTS & CATALOG HIGHLIGHTS SECTION */}
+              <div className="space-y-8">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+                  <div>
+                    <h3 className="text-3xl font-black text-gray-800 tracking-tight">Nuestros Cuadernos de Trabajo</h3>
+                    <p className="text-gray-500">Material didáctico estructurado de primer nivel para cada grado de secundaria.</p>
+                  </div>
+                  <button className="btn btn-secondary flex items-center gap-1.5 font-bold" onClick={() => setCurrentView('catalog')}>
+                    Ver Catálogo Completo <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {[
+                    { grade: 1, title: "Creciendo Juntos 1° de Secundaria", desc: "Introducción a los fundamentos de la fe, valores familiares y moral básica.", price: 45.00, img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=400&auto=format&fit=crop" },
+                    { grade: 3, title: "Creciendo Juntos 3° de Secundaria", desc: "El rol de la fe en la juventud contemporánea, historia eclesial y valores cívicos.", price: 45.00, img: "https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=400&auto=format&fit=crop", best: true },
+                    { grade: 5, title: "Creciendo Juntos 5° de Secundaria", desc: "Preparación moral y ética para el egreso escolar y proyecto de vida cristiano.", price: 45.00, img: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=400&auto=format&fit=crop" }
+                  ].map((book, i) => (
+                    <div key={i} className="glass-panel group overflow-hidden bg-white border border-gray-100 flex flex-col hover:shadow-premium transform hover:-translate-y-1 transition-all duration-300">
+                      <div className="relative aspect-video overflow-hidden bg-gray-100">
+                        {book.best && (
+                          <span className="absolute top-3 right-3 z-10 bg-yellow-500 text-gray-900 font-extrabold text-xs px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+                            <Star className="w-3 h-3 fill-gray-900" /> RECOMENDADO
+                          </span>
+                        )}
+                        <img src={book.img} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      </div>
+                      <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                        <div className="space-y-2">
+                          <span className="text-2xs font-extrabold tracking-widest text-teal-600 uppercase font-mono">{book.grade}° Grado de Secundaria</span>
+                          <h4 className="font-extrabold text-lg text-slate-800 leading-snug group-hover:text-primary transition-colors">{book.title}</h4>
+                          <p className="text-gray-500 text-xs leading-relaxed line-clamp-2">{book.desc}</p>
+                        </div>
+                        <div className="flex justify-between items-center pt-2">
+                          <span className="text-xl font-black text-primary-dark">S/ {book.price.toFixed(2)}</span>
+                          <button className="btn btn-secondary text-2xs py-2 px-4 font-bold border border-gray-200 group-hover:border-primary group-hover:bg-primary group-hover:text-white transition-all" onClick={() => setCurrentView('catalog')}>
+                            Explorar Detalle
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* SEMINARIOS / TRAINING BANNER */}
+              <div id="seccion-capacitaciones" className="bg-gradient-to-r from-teal-500 to-indigo-600 rounded-3xl p-8 md:p-12 text-white flex flex-col md:flex-row items-center gap-8 shadow-lg">
+                <div className="flex-1 space-y-4">
+                  <span className="bg-white/20 text-white font-extrabold text-2xs px-3.5 py-1 rounded-full uppercase tracking-wider">Capacitaciones Docentes</span>
+                  <h3 className="text-3xl font-black leading-tight">Seminario de Didáctica, Ética y Juventud 2026</h3>
+                  <p className="text-teal-50/90 text-sm md:text-base leading-relaxed">
+                    Potencia tus clases de Educación Religiosa con herramientas de aula virtual, dinámicas de valores y descarga de tu certificado validado con firma y código QR al finalizar.
+                  </p>
+                  <div className="flex flex-wrap gap-x-6 gap-y-2 pt-2 text-xs md:text-sm font-semibold">
+                    <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-yellow-300" /> 100% Virtual</span>
+                    <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-yellow-300" /> 120 Horas Pedagógicas</span>
+                    <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-yellow-300" /> Certificado con Código QR</span>
+                  </div>
+                </div>
+                <div className="flex flex-col items-center md:items-end justify-center min-w-[200px] space-y-3">
+                  <button className="btn bg-white hover:bg-teal-50 text-indigo-700 font-extrabold border-none shadow-md px-6 py-3.5 w-full transform hover:scale-105 transition-all text-center" onClick={() => { setAuthMode('register'); setShowAuthModal(true); }}>
+                    Inscribirme Gratis
+                  </button>
+                  <button className="text-xs text-white/90 hover:underline hover:text-white transition-colors" onClick={() => setCurrentView('verify-cert')}>
+                    Verificar mi certificado anterior
+                  </button>
+                </div>
+              </div>
+
+              {/* TESTIMONIALS */}
+              <div className="space-y-8 text-center">
+                <h3 className="text-3xl font-black text-gray-800 tracking-tight">¿Qué dicen los Colegios y Docentes?</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {[
+                    { quote: "La integración del aula virtual ha facilitado el control de tareas y la participación. Los alumnos disfrutan mucho la lectura digital.", author: "Prof. María Elena Rivas", role: "Docente de Religión - Colegio Santa Ana" },
+                    { quote: "Los certificados QR y las capacitaciones de la Colección son excelentes y totalmente oficiales. La metodología es sumamente didáctica.", author: "Lic. Carlos Alberto Torres", role: "Director Pedagógico - IEP San Agustín" },
+                    { quote: "Libros impresos de excelente calidad con ilustraciones hermosas y actividades muy bien pensadas para los adolescentes de hoy.", author: "Prof. Juana Inés Cruz", role: "Docente de 1° a 5° - Colegio Fe y Alegría" }
+                  ].map((t, idx) => (
+                    <div key={idx} className="glass-panel p-8 bg-white border border-gray-100 shadow-sm relative flex flex-col justify-between hover:shadow-md transition-shadow duration-300">
+                      <div className="text-yellow-400 flex justify-center gap-1 mb-4">
+                        {[1, 2, 3, 4, 5].map(s => <Star key={s} className="w-4 h-4 fill-yellow-400" />)}
+                      </div>
+                      <p className="text-gray-600 text-sm italic leading-relaxed">"{t.quote}"</p>
+                      <div className="mt-6 border-t border-gray-50 pt-4">
+                        <h5 className="font-extrabold text-sm text-slate-800">{t.author}</h5>
+                        <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">{t.role}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* WHATSAPP FLOAT BUTTON WITH LIVE CLICK COUNTER */}
+              <div className="bg-emerald-50 rounded-3xl p-8 border border-emerald-100 flex flex-col md:flex-row justify-between items-center gap-6 shadow-sm">
+                <div className="space-y-2 text-center md:text-left">
+                  <h4 className="text-xl font-extrabold text-emerald-800 flex items-center justify-center md:justify-start gap-2">
+                    <Phone className="w-5 h-5 fill-emerald-800" /> ¿Necesitas atención por WhatsApp?
+                  </h4>
+                  <p className="text-emerald-700/80 text-sm max-w-xl">
+                    Chatea en vivo con nuestros asesores para pedidos institucionales, libros y material para colegios. 
+                  </p>
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                  <button className="btn bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold border-none shadow-md px-6 py-3 flex items-center gap-2 transform hover:scale-105 transition-all" onClick={handleWaClick}>
+                    <span>Conversar ahora</span>
+                    <span className="bg-emerald-800 text-white px-2 py-0.5 rounded-full text-xs font-mono">{waInteractions} clics</span>
+                  </button>
+                  <span className="text-emerald-700 text-3xs font-mono uppercase tracking-wider">Contador de consultas activo</span>
+                </div>
+              </div>
+
+              {/* INTERACTIVE CHATBOOK (FAST CONTACT MODAL) */}
+              <div className="fixed bottom-6 right-6 z-40">
+                {!chatOpen ? (
+                  <button className="w-14 h-14 bg-primary hover:bg-primary-dark text-white rounded-full flex items-center justify-center shadow-premium transform hover:scale-110 transition-all cursor-pointer animate-bounce" onClick={() => setChatOpen(true)}>
+                    <MessageSquare className="w-6 h-6" />
+                  </button>
+                ) : (
+                  <div className="w-80 md:w-96 bg-white rounded-3xl shadow-premium border border-gray-100 overflow-hidden flex flex-col max-h-[450px] animate-slide-up">
+                    {/* Chat Header */}
+                    <div className="bg-primary text-white p-4 flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 bg-green-400 rounded-full animate-ping"></div>
+                        <h4 className="font-extrabold text-sm">Asistente Creciendo Juntos</h4>
+                      </div>
+                      <button className="text-white hover:text-gray-200 text-lg font-light" onClick={() => setChatOpen(false)}>×</button>
+                    </div>
+
+                    {/* Chat Messages */}
+                    <div className="flex-1 p-4 space-y-3 overflow-y-auto max-h-[280px] text-xs">
+                      {chatMessages.map((msg, i) => (
+                        <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`p-3 rounded-2xl max-w-[80%] leading-relaxed shadow-sm ${msg.sender === 'user' ? 'bg-primary text-white rounded-tr-none' : 'bg-gray-100 text-gray-700 rounded-tl-none'}`}>
+                            {msg.text}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Chat Quick Options Footer */}
+                    <div className="bg-gray-50 p-3 border-t border-gray-100 space-y-1.5">
+                      <div className="text-[10px] text-gray-400 uppercase font-mono tracking-wider mb-1 px-1">Respuestas rápidas:</div>
+                      <div className="flex flex-wrap gap-1.5">
+                        <button className="bg-white hover:bg-primary-light text-primary border border-gray-100 hover:border-primary-light text-3xs px-2 py-1.5 rounded-full transition-colors" onClick={() => handleChatOption(
+                          '¿Cómo comprar?', 
+                          'Puedes comprar los libros impresos y digitales seleccionando la opción "Libros" del menú superior y agregando el producto al carrito. Aceptamos depósitos y tarjetas de crédito.'
+                        )}>🛍️ ¿Cómo comprar?</button>
+                        <button className="bg-white hover:bg-primary-light text-primary border border-gray-100 hover:border-primary-light text-3xs px-2 py-1.5 rounded-full transition-colors" onClick={() => handleChatOption(
+                          '¿Tienen demostración?', 
+                          '¡Sí! En los módulos del curso, nuestros docentes y estudiantes pueden visualizar los temas, ver videos instructivos de YouTube y descargar fragmentos en PDF.'
+                        )}>📚 ¿Demostración?</button>
+                        <button className="bg-white hover:bg-primary-light text-primary border border-gray-100 hover:border-primary-light text-3xs px-2 py-1.5 rounded-full transition-colors" onClick={() => handleChatOption(
+                          '¿El certificado es oficial?', 
+                          '¡Totalmente! Los certificados emitidos tienen 120 horas pedagógicas oficiales y un código QR único con el cual cualquier institución puede validar su autenticidad.'
+                        )}>🎓 ¿Certificado oficial?</button>
+                        <button className="bg-white hover:bg-primary-light text-primary border border-gray-100 hover:border-primary-light text-3xs px-2 py-1.5 rounded-full transition-colors" onClick={() => handleChatOption(
+                          'Hablar con un asesor', 
+                          'Te redirigiré al WhatsApp oficial de soporte de inmediato para una asistencia personalizada.'
+                        )}>💬 Hablar con Asesor</button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
