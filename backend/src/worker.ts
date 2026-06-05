@@ -33,7 +33,10 @@ app.use('*', async (c, next) => {
   if (!dbInitialized && c.env.DB) {
     try {
       // Check if roles table exists and has data
-      await c.env.DB.prepare("SELECT id FROM roles LIMIT 1").all();
+      const checkRoles = await c.env.DB.prepare("SELECT id FROM roles LIMIT 1").all();
+      if (!checkRoles || !checkRoles.results || checkRoles.results.length === 0) {
+        throw new Error("Roles table is empty");
+      }
       dbInitialized = true;
     } catch (err) {
       console.log("D1 Database tables do not exist. Initializing schema...");

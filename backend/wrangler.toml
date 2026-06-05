@@ -9,4 +9,4 @@ JWT_SECRET = "creciendo_juntos_super_secret_key_2026"
 [[d1_databases]]
 binding = "DB"
 database_name = "creciendo-juntos-db"
-database_id = "01daa383-7830-4db3-a5f6-9401942074d0"
+database_id = "bf1bae7d-9390-4a62-bdd1-50883243e7ae"

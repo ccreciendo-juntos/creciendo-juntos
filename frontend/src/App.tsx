@@ -901,7 +901,7 @@ export default function App() {
           </div>
           
           <nav className="hidden md:flex items-center gap-8">
-            <button className="text-sm font-semibold hover:text-primary transition-colors" onClick={() => { setCurrentView('catalog'); setFilterGrade(null); }}>Libros</button>
+            <button className="text-sm font-semibold hover:text-primary transition-colors" onClick={() => { setCurrentView('catalog'); setFilterGrade(null); setTimeout(() => document.getElementById('seccion-libros')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>Libros</button>
             <button className="text-sm font-semibold hover:text-primary transition-colors" onClick={() => { setCurrentView('catalog'); setTimeout(() => document.getElementById('seccion-capacitaciones')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>Capacitaciones</button>
             <button className="text-sm font-semibold hover:text-primary transition-colors" onClick={() => { setCurrentView('verify-cert'); setVerifiedCert(null); }}>Verificar Certificado</button>
             {user && (
@@ -1218,7 +1218,7 @@ export default function App() {
           )}
 
           {currentView === 'catalog' && (
-            <div className="space-y-8 animate-fade-in">
+            <div id="seccion-libros" className="space-y-8 animate-fade-in">
               <h2 className="text-3xl font-black text-gray-800">Catálogo de Cuadernos de Trabajo</h2>
               <div className="flex gap-2 overflow-x-auto pb-2">
                 <button className={`btn ${filterGrade === null ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setFilterGrade(null)}>Todos los Grados</button>
