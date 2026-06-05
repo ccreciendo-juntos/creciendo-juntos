@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #1a56db;
+  --color-primary-light: #ebf5ff;
+  --color-primary-dark: #1e429f;
+  
+  --color-accent: #d09a0a;
+  --color-accent-light: #fdf6b2;
+  --color-accent-dark: #8e6200;
+
+  --color-success: #0e9f6e;
+  --color-success-light: #def7ec;
+  
+  --color-error: #f05252;
+  --color-error-light: #fde8e8;
+  
+  --color-warning: #ff8a4c;
+  --color-warning-light: #fff3eb;
+  
+  --shadow-premium: 0 20px 25px -5px rgba(26, 86, 219, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Common utilities built on top of Tailwind v4 */
+.glass-panel {
+  @apply bg-white/75 backdrop-blur-md border border-white/50 shadow-premium rounded-xl;
+}
+
+.btn {
+  @apply inline-flex items-center justify-center px-5 py-2.5 font-medium rounded-lg cursor-pointer transition-all duration-200 border border-transparent text-sm;
+}
+
+.btn-primary {
+  @apply bg-primary text-white shadow-[0_4px_14px_0_rgba(26,86,219,0.3)] hover:bg-primary-dark hover:-translate-y-0.5 hover:shadow-[0_6px_20px_0_rgba(26,86,219,0.4)];
+}
+
+.btn-secondary {
+  @apply bg-white border-gray-200 text-gray-900 hover:bg-gray-50 hover:border-gray-400;
+}
+
+.btn-accent {
+  @apply bg-accent text-white shadow-[0_4px_14px_0_rgba(208,154,10,0.3)] hover:bg-accent-dark hover:-translate-y-0.5;
+}
+
+.form-group {
+  @apply mb-5;
+}
+
+.form-label {
+  @apply block text-sm font-medium mb-1.5 text-gray-900;
+}
+
+.form-control {
+  @apply w-full px-3.5 py-2.5 text-sm rounded-lg border border-gray-200 bg-white transition-all duration-200 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15;
+}
+
+.spinner {
+  @apply w-10 h-10 border-4 border-primary/10 border-t-primary rounded-full animate-spin;
+}

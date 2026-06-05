@@ -1,0 +1,12 @@
+name = "creciendo-juntos-api"
+main = "src/worker.ts"
+compatibility_date = "2026-06-05"
+compatibility_flags = [ "nodejs_compat" ]
+
+[vars]
+JWT_SECRET = "creciendo_juntos_super_secret_key_2026"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "creciendo-juntos-db"
+database_id = "d1-local-dev-id"
