@@ -1309,7 +1309,7 @@ export default function App() {
                 {/* Banner Nombramiento Docente 2026 */}
                 <div className="glass-panel flex flex-col md:flex-row gap-6 p-8 items-center bg-gradient-to-r from-slate-900 via-slate-850 to-primary-dark text-white rounded-2xl overflow-hidden relative shadow-premium">
                   <div className="flex-1 space-y-4 z-10">
-                    <span className="bg-yellow-400 text-slate-900 text-2xs font-extrabold uppercase px-2.5 py-1 rounded-full">Grupo Auge</span>
+                    <span className="bg-yellow-400 text-slate-900 text-2xs font-extrabold uppercase px-2.5 py-1 rounded-full">E. Alberto M.</span>
                     <h3 className="text-3xl md:text-4xl font-black text-yellow-400 tracking-tight">NOMBRAMIENTO DOCENTE 2026</h3>
                     <ul className="text-xs space-y-2 text-gray-300 pl-1 list-none font-medium">
                       <li className="flex items-center gap-1.5"><span className="text-yellow-400">▶</span> Clases en vivo <strong>con especialistas</strong></li>
@@ -2941,7 +2941,7 @@ export default function App() {
             <h4 className="font-extrabold text-white text-md">Colección Creciendo Juntos</h4>
             <p className="text-xs text-gray-500 mt-1">Plataforma Educativa Religiosa de Secundaria</p>
           </div>
-          <p className="text-xs text-gray-500">&copy; 2026 Grupo Auge. Todos los derechos reservados.</p>
+          <p className="text-xs text-gray-500">derechos reservados por E. Alberto M.</p>
         </div>
       </footer>
     </div>
