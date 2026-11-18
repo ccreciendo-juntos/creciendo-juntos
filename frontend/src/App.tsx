@@ -9,6 +9,7 @@ import {
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { jsPDF } from 'jspdf';
 import { request } from './services/api';
+import { TeacherVeloxDashboard } from './components/velox/TeacherVeloxDashboard';
 
 // Interface types
 interface UserData {
@@ -2129,9 +2130,13 @@ export default function App() {
                 </div>
               )}
 
-              {/* TEACHER VIEW */}
+              {/* TEACHER VIEW (VELOX REGEVA 2026 - ÁREA EDUCACIÓN RELIGIOSA) */}
               {user.role === 'docente' && (
-                <div className="space-y-8">
+                <TeacherVeloxDashboard
+                  user={user}
+                  onReturnToPlatform={() => setCurrentView('landing')}
+                  originalClassroomsSection={
+                    <div className="space-y-8">
                   <div className="flex justify-between items-center">
                     <h3 className="font-bold text-xl text-gray-800">Mis Aulas</h3>
                     <button className="btn btn-primary" onClick={() => setShowCreateClassroom(true)}><Plus className="w-4 h-4 mr-1.5" /> Crear Aula</button>
@@ -2624,7 +2629,9 @@ export default function App() {
                       )}
                     </div>
                   )}
-                </div>
+                    </div>
+                  }
+                />
               )}
 
               {/* STUDENT VIEW */}
