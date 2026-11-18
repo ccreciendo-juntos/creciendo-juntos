@@ -1,9 +1,21 @@
 @import "tailwindcss";
 
 @theme {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
   --color-primary: #1a56db;
   --color-primary-light: #ebf5ff;
   --color-primary-dark: #1e429f;
+  
+  /* EducaAuge Vibrant Red Palette */
+  --color-auge-red: #e11d48;
+  --color-auge-red-hover: #be123c;
+  --color-auge-dark: #0f172a;
+  
+  /* EducaDocente Deep Teal Palette */
+  --color-teal-brand: #008080;
+  --color-teal-brand-dark: #006666;
+  --color-teal-light: #f0fdfa;
   
   --color-accent: #d09a0a;
   --color-accent-light: #fdf6b2;
@@ -18,24 +30,45 @@
   --color-warning: #ff8a4c;
   --color-warning-light: #fff3eb;
   
-  --shadow-premium: 0 20px 25px -5px rgba(26, 86, 219, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-premium: 0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+  --shadow-glow-red: 0 10px 25px -5px rgba(225, 29, 72, 0.35);
+  --shadow-glow-teal: 0 10px 25px -5px rgba(0, 128, 128, 0.35);
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  color: #1e293b;
+  background-color: #f8fafc;
+}
+
+/* Hide horizontal scrollbar while keeping scroll functional */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Common utilities built on top of Tailwind v4 */
 .glass-panel {
-  @apply bg-white/75 backdrop-blur-md border border-white/50 shadow-premium rounded-xl;
+  @apply bg-white/95 backdrop-blur-md border border-slate-100 shadow-premium rounded-2xl;
 }
 
 .btn {
-  @apply inline-flex items-center justify-center px-5 py-2.5 font-medium rounded-lg cursor-pointer transition-all duration-200 border border-transparent text-sm;
+  @apply inline-flex items-center justify-center px-5 py-2.5 font-semibold rounded-xl cursor-pointer transition-all duration-200 border border-transparent text-sm select-none;
 }
 
 .btn-primary {
-  @apply bg-primary text-white shadow-[0_4px_14px_0_rgba(26,86,219,0.3)] hover:bg-primary-dark hover:-translate-y-0.5 hover:shadow-[0_6px_20px_0_rgba(26,86,219,0.4)];
+  @apply bg-auge-red text-white shadow-glow-red hover:bg-auge-red-hover hover:-translate-y-0.5;
+}
+
+.btn-teal {
+  @apply bg-teal-brand text-white shadow-glow-teal hover:bg-teal-brand-dark hover:-translate-y-0.5 rounded-full px-6 py-2.5;
 }
 
 .btn-secondary {
-  @apply bg-white border-gray-200 text-gray-900 hover:bg-gray-50 hover:border-gray-400;
+  @apply bg-white border-slate-200 text-slate-800 hover:bg-slate-50 hover:border-slate-400;
 }
 
 .btn-accent {
@@ -47,13 +80,43 @@
 }
 
 .form-label {
-  @apply block text-sm font-medium mb-1.5 text-gray-900;
+  @apply block text-sm font-semibold mb-1.5 text-slate-800;
 }
 
 .form-control {
-  @apply w-full px-3.5 py-2.5 text-sm rounded-lg border border-gray-200 bg-white transition-all duration-200 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15;
+  @apply w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-white transition-all duration-200 focus:outline-none focus:border-auge-red focus:ring-4 focus:ring-rose-500/15;
 }
 
 .spinner {
-  @apply w-10 h-10 border-4 border-primary/10 border-t-primary rounded-full animate-spin;
+  @apply w-10 h-10 border-4 border-rose-500/10 border-t-auge-red rounded-full animate-spin;
+}
+
+/* Animations */
+@keyframes floatGentle {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.4); }
+  50% { box-shadow: 0 0 0 10px rgba(225, 29, 72, 0); }
+}
+
+@keyframes shimmerEffect {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-float-gentle {
+  animation: floatGentle 4s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2.5s infinite;
+}
+
+.shimmer-badge {
+  background: linear-gradient(90deg, #fef08a 0%, #ffffff 50%, #fef08a 100%);
+  background-size: 200% auto;
+  animation: shimmerEffect 2.5s linear infinite;
 }

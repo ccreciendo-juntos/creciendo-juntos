@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  ShoppingCart, User, LogOut, Award, Plus, Trash2, 
+  ShoppingCart, LogOut, Award, Plus, Trash2, 
   Upload, Search, ArrowRight, QrCode, TrendingUp, Check, FileDown,
-  MessageSquare, Play, Star, GraduationCap, CheckCircle, Flame, Phone
+  MessageSquare, Play, Star, CheckCircle, Flame, Phone,
+  ChevronLeft, ChevronRight, ShieldCheck, Sparkles, Clock, 
+  Menu, X
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { jsPDF } from 'jspdf';
@@ -46,6 +48,10 @@ interface CartItem {
 export default function App() {
   // Navigation State
   const [currentView, setCurrentView] = useState<'landing' | 'catalog' | 'cart' | 'checkout' | 'verify-cert' | 'dashboard'>('landing');
+  const [activeHeaderNav, setActiveHeaderNav] = useState<'inicio' | 'cursos' | 'libros' | 'simulacros' | 'certificados' | 'testimonios' | 'ayuda'>('inicio');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [selectedProgramFilter, setSelectedProgramFilter] = useState<'todos' | 'ascenso' | 'nombramiento' | 'directivos' | 'secundaria'>('todos');
+  const [vibrantCarouselIndex, setVibrantCarouselIndex] = useState(0);
   
   // Landing Page Interactive State
   const [waInteractions, setWaInteractions] = useState(() => parseInt(localStorage.getItem('wa_interactions') || '387'));
@@ -886,128 +892,512 @@ export default function App() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-900">
-      {/* HEADER NAVBAR */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 py-4 shadow-sm">
-        <div className="container mx-auto px-6 flex justify-between items-center">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentView('landing')}>
-            <div className="w-10 h-10 rounded-full bg-[#1e293b] border border-white/25 flex items-center justify-center text-white text-xs font-bold font-serif relative shadow-premium">
-              <span className="text-sm">✝</span>
-              <span className="absolute text-[7px] bottom-0.5 font-sans tracking-widest text-gray-300">CJ</span>
+      {/* TOP UTILITY ANNOUNCEMENT BAR (EDUCADOCENTE STYLE) */}
+      <div className="bg-[#004D40] text-teal-100 text-[11px] font-medium py-1.5 px-4 border-b border-teal-900/40">
+        <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-1.5">
+          <div className="flex items-center gap-2">
+            <span className="bg-[#FACC15] text-slate-950 font-black px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider">OFICIAL</span>
+            <span>11 Años Formando Docentes y Estudiantes con Excelencia • 120 Horas Pedagógicas MINEDU</span>
+          </div>
+          <div className="flex items-center gap-4 text-[11px]">
+            <span className="hidden md:inline">🚚 Envíos físicos y licencias digitales a todo el Perú</span>
+            <button onClick={handleWaClick} className="hover:text-yellow-300 transition-colors flex items-center gap-1 cursor-pointer font-bold">
+              <Phone className="w-3 h-3 text-emerald-400" /> WhatsApp Oficial
+            </button>
+            <span className="hidden sm:inline">✉️ informes@creciendojuntos.com</span>
+          </div>
+        </div>
+      </div>
+
+      {/* HEADER NAVBAR (EDUCAAUGE + EDUCADOCENTE FUSION) */}
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all">
+        <div className="container mx-auto px-4 md:px-6 flex justify-between items-center py-2.5">
+          {/* Brand Logo - EducaAuge Red Emblem Style */}
+          <div className="flex items-center gap-3 cursor-pointer group select-none" onClick={() => { setCurrentView('landing'); setActiveHeaderNav('inicio'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+            <div className="w-11 h-11 rounded-full bg-[#E11D48] flex items-center justify-center text-white text-base font-bold shadow-md shadow-rose-500/25 group-hover:scale-105 transition-transform">
+              <span className="font-serif">✝</span>
             </div>
             <div>
-              <h1 className="text-xl font-extrabold text-primary tracking-tight">Creciendo Juntos</h1>
-              <p className="text-xs text-gray-500">Educación Religiosa Secundaria</p>
+              <div className="text-[10px] font-black uppercase tracking-widest text-[#E11D48] leading-tight">COLECCIÓN</div>
+              <h1 className="text-xl font-black text-slate-900 tracking-tight leading-none">Creciendo Juntos</h1>
+              <span className="text-[10px] text-slate-500 font-semibold block leading-tight">Educación Religiosa Secundaria</span>
             </div>
           </div>
-          
-          <nav className="hidden md:flex items-center gap-8">
-            <button className="text-sm font-semibold hover:text-primary transition-colors" onClick={() => { setCurrentView('catalog'); setFilterGrade(null); setTimeout(() => document.getElementById('seccion-libros')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>Libros</button>
-            <button className="text-sm font-semibold hover:text-primary transition-colors" onClick={() => { setCurrentView('catalog'); setTimeout(() => document.getElementById('seccion-capacitaciones')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>Capacitaciones</button>
-            <button className="text-sm font-semibold hover:text-primary transition-colors" onClick={() => { setCurrentView('verify-cert'); setVerifiedCert(null); }}>Verificar Certificado</button>
-            {user && (
-              <button className="text-sm font-semibold text-primary hover:underline transition-colors" onClick={() => setCurrentView('dashboard')}>Mi Panel</button>
-            )}
-            
-            <div className="flex items-center gap-6">
-              <div className="relative cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setCurrentView('cart')}>
-                <ShoppingCart className="w-6 h-6 text-gray-700" />
-                {cart.length > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-error text-white rounded-full px-1.5 py-0.5 text-3xs font-extrabold animate-pulse">
-                    {cart.reduce((sum, item) => sum + item.quantity, 0)}
-                  </span>
+
+          {/* Navigation Menu (EducaAuge style with red underline indicator) */}
+          <nav className="hidden lg:flex items-center gap-7">
+            {[
+              { id: 'inicio', label: 'Inicio', action: () => { setCurrentView('landing'); setActiveHeaderNav('inicio'); window.scrollTo({ top: 0, behavior: 'smooth' }); } },
+              { id: 'cursos', label: 'Cursos', action: () => { setCurrentView('landing'); setActiveHeaderNav('cursos'); setTimeout(() => document.getElementById('programas-preparacion')?.scrollIntoView({ behavior: 'smooth' }), 100); } },
+              { id: 'libros', label: 'Cuadernos 1° a 5°', action: () => { setCurrentView('landing'); setActiveHeaderNav('libros'); setTimeout(() => document.getElementById('cuadernos-seccion')?.scrollIntoView({ behavior: 'smooth' }), 100); } },
+              { id: 'simulacros', label: 'Simulacros', action: () => { setCurrentView('landing'); setActiveHeaderNav('simulacros'); setTimeout(() => document.getElementById('simulacros-seccion')?.scrollIntoView({ behavior: 'smooth' }), 100); } },
+              { id: 'certificados', label: 'Verificar Certificado', action: () => { setCurrentView('verify-cert'); setActiveHeaderNav('certificados'); setVerifiedCert(null); } },
+              { id: 'testimonios', label: 'Testimonios', action: () => { setCurrentView('landing'); setActiveHeaderNav('testimonios'); setTimeout(() => document.getElementById('testimonios-seccion')?.scrollIntoView({ behavior: 'smooth' }), 100); } },
+              { id: 'ayuda', label: 'Ayuda', action: () => setChatOpen(true) },
+            ].map(item => (
+              <button
+                key={item.id}
+                onClick={item.action}
+                className={`text-sm font-bold tracking-tight transition-all relative py-1 cursor-pointer ${
+                  activeHeaderNav === item.id ? 'text-[#E11D48]' : 'text-slate-700 hover:text-[#E11D48]'
+                }`}
+              >
+                {item.label}
+                {activeHeaderNav === item.id && (
+                  <span className="absolute bottom-0 left-0 w-full h-[2.5px] bg-[#E11D48] rounded-full animate-fade-in" />
                 )}
-              </div>
-              
-              {user ? (
-                <div className="flex items-center gap-3 border-l border-gray-200 pl-6">
-                  <User className="w-5 h-5 text-gray-400" />
-                  <span className="text-sm font-semibold text-gray-800">{user.name}</span>
-                  <button className="btn btn-secondary px-3 py-1.5" onClick={handleLogout}>
-                    <LogOut className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <button className="btn btn-primary" onClick={() => { setAuthMode('login'); setShowAuthModal(true); }}>
-                  Acceder
-                </button>
+              </button>
+            ))}
+          </nav>
+
+          {/* Right Action: Cart + Red Pill "Ingresar a mi aula" Button */}
+          <div className="flex items-center gap-4">
+            <div className="relative cursor-pointer hover:opacity-80 transition-opacity p-2" onClick={() => setCurrentView('cart')}>
+              <ShoppingCart className="w-6 h-6 text-slate-700" />
+              {cart.length > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-[#E11D48] text-white rounded-full px-1.5 py-0.5 text-3xs font-black shadow-sm animate-pulse">
+                  {cart.reduce((sum, item) => sum + item.quantity, 0)}
+                </span>
               )}
             </div>
-          </nav>
+
+            {user ? (
+              <div className="flex items-center gap-3 border-l border-slate-200 pl-4">
+                <div className="cursor-pointer flex items-center gap-2" onClick={() => setCurrentView('dashboard')}>
+                  <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs">
+                    {user.name.charAt(0)}
+                  </div>
+                  <span className="text-xs font-bold text-slate-800 hidden sm:inline max-w-[100px] truncate">{user.name}</span>
+                </div>
+                <button className="btn bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-lg" onClick={handleLogout} title="Cerrar sesión">
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <button 
+                className="bg-[#E11D48] hover:bg-[#BE123C] text-white px-5 sm:px-6 py-2.5 rounded-full font-black text-xs sm:text-sm shadow-md shadow-rose-500/30 hover:shadow-lg hover:shadow-rose-500/40 transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer" 
+                onClick={() => { setAuthMode('login'); setShowAuthModal(true); }}
+              >
+                Ingresar a mi aula
+              </button>
+            )}
+
+            {/* Mobile Menu Button */}
+            <button 
+              className="lg:hidden p-2 text-slate-700 hover:text-[#E11D48] cursor-pointer" 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Drawer */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden bg-white border-t border-slate-100 px-6 py-4 space-y-3 shadow-lg">
+            <button className="block w-full text-left font-bold text-sm py-2 text-slate-800 hover:text-[#E11D48]" onClick={() => { setCurrentView('landing'); setMobileMenuOpen(false); }}>Inicio</button>
+            <button className="block w-full text-left font-bold text-sm py-2 text-slate-800 hover:text-[#E11D48]" onClick={() => { setCurrentView('landing'); setMobileMenuOpen(false); setTimeout(() => document.getElementById('programas-preparacion')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>Cursos y Programas</button>
+            <button className="block w-full text-left font-bold text-sm py-2 text-slate-800 hover:text-[#E11D48]" onClick={() => { setCurrentView('landing'); setMobileMenuOpen(false); setTimeout(() => document.getElementById('cuadernos-seccion')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>Cuadernos 1° a 5°</button>
+            <button className="block w-full text-left font-bold text-sm py-2 text-slate-800 hover:text-[#E11D48]" onClick={() => { setCurrentView('verify-cert'); setMobileMenuOpen(false); }}>Verificar Certificado</button>
+            <button className="block w-full text-left font-bold text-sm py-2 text-slate-800 hover:text-[#E11D48]" onClick={() => { handleWaClick(); setMobileMenuOpen(false); }}>Atención WhatsApp</button>
+          </div>
+        )}
       </header>
 
       {/* CORE PAGES ROUTER */}
       <main className="flex-1 py-8">
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-4 md:px-6">
           {currentView === 'landing' && (
-            <div className="space-y-16 animate-fade-in pb-16">
-              {/* URGENCY & TRUST BANNER */}
-              <div className="bg-amber-500 text-white font-bold py-2.5 px-4 text-center rounded-xl flex items-center justify-center gap-2 text-xs md:text-sm animate-pulse shadow-md">
-                <Flame className="w-4 h-4 fill-white" />
-                <span>¡OFERTA EXCLUSIVA 2026! 20% de descuento en licencias digitales y capacitaciones pedagógicas esta semana.</span>
-              </div>
-
-              {/* HERO SECTION */}
-              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900 via-primary-dark to-teal-950 text-white p-8 md:p-16 shadow-premium">
-                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
-                <div className="relative z-10 flex flex-col lg:flex-row items-center gap-12">
-                  <div className="flex-1 space-y-8">
-                    <span className="inline-flex items-center gap-1.5 bg-teal-400/20 text-teal-300 px-4 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-widest border border-teal-500/30">
-                      <GraduationCap className="w-3.5 h-3.5" /> Educación Religiosa Secundaria
-                    </span>
-                    <h2 className="text-4xl md:text-6xl font-black leading-tight tracking-tight">
-                      Formando valores cívicos y morales <span className="text-yellow-400">con excelencia</span>
-                    </h2>
-                    <p className="text-gray-300 text-lg md:text-xl font-light leading-relaxed max-w-2xl">
-                      La solución pedagógica integral preferida por más de 150 colegios. Libros interactivos estructurados, guías metodológicas docentes y aula virtual en una sola plataforma serverless de alta velocidad.
-                    </p>
-                    
-                    {/* Doctrinal Quote Banner */}
-                    <div className="border-l-4 border-yellow-400 pl-4 py-2 italic bg-white/5 rounded-r-2xl max-w-xl">
-                      <p className="text-sm md:text-base text-gray-200">"Crean lo que aprenden, enseñen lo que creen y practiquen lo que enseñan."</p>
-                      <span className="text-xs text-yellow-400/80 block mt-1 font-semibold">— San Agustín</span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-4 pt-2">
-                      <button className="btn btn-primary bg-yellow-500 hover:bg-yellow-400 text-gray-900 border-none shadow-lg px-8 py-3.5 font-extrabold text-sm md:text-base flex items-center gap-2 transform hover:-translate-y-0.5 transition-all animate-bounce" onClick={() => setCurrentView('catalog')}>
-                        Comprar Cuadernos <ArrowRight className="w-5 h-5" />
-                      </button>
-                      <button className="btn border border-white/30 bg-white/10 hover:bg-white/20 text-white px-8 py-3.5 font-bold text-sm md:text-base rounded-xl transform hover:-translate-y-0.5 transition-all" onClick={() => { setAuthMode('register'); setShowAuthModal(true); }}>
-                        Registrarme como Docente
-                      </button>
-                    </div>
-                  </div>
-                  <div className="w-full lg:w-2/5 flex justify-center relative">
-                    <div className="absolute -inset-4 bg-teal-500/20 rounded-full blur-3xl"></div>
-                    <img 
-                      src="https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?q=80&w=500&auto=format&fit=crop" 
-                      alt="Colección Creciendo Juntos Libros" 
-                      className="relative z-10 w-72 md:w-80 h-96 object-cover rounded-2xl shadow-2xl border-4 border-white/10 transform hover:rotate-2 hover:scale-105 transition-all duration-500" 
-                    />
-                  </div>
+            <div className="space-y-16 animate-fade-in pb-20">
+              
+              {/* HERO SECTION - EDUCADOCENTE HEADLINE STYLE */}
+              <div className="text-center max-w-4xl mx-auto space-y-4 pt-2">
+                <div className="inline-flex items-center gap-2 bg-[#F0FDFA] border border-[#0D9488]/30 text-[#006666] font-extrabold text-xs px-4 py-1.5 rounded-full uppercase tracking-wider shadow-sm">
+                  <Sparkles className="w-3.5 h-3.5 text-[#008080]" /> 11 Años Formando Docentes que Avanzan, Crecen y Logran Más
+                </div>
+                <h2 className="text-3xl md:text-5xl font-black text-slate-900 leading-[1.15] tracking-tight">
+                  11 años formando docentes que <span className="text-[#008080]">avanzan, crecen</span> y logran más.
+                </h2>
+                <p className="text-slate-600 text-base md:text-lg max-w-2xl mx-auto font-normal leading-relaxed">
+                  Programas 100% prácticos, diseñados por expertos para fortalecer tu crecimiento docente y formar valores cívicos y morales en secundaria de 1° a 5°.
+                </p>
+                <div className="inline-block bg-amber-50 border-l-4 border-amber-400 px-4 py-2 rounded-r-xl text-slate-700 text-xs italic font-medium">
+                  "Crean lo que aprenden, enseñen lo que creen y practiquen lo que enseñan." — San Agustín
+                </div>
+                <div className="flex flex-wrap justify-center gap-4 pt-2">
+                  <button 
+                    onClick={() => { setTimeout(() => document.getElementById('programas-preparacion')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
+                    className="bg-[#E11D48] hover:bg-[#BE123C] text-white px-8 py-3.5 rounded-full font-black text-sm shadow-lg shadow-rose-500/25 hover:shadow-xl hover:shadow-rose-500/35 transition-all transform hover:-translate-y-0.5 cursor-pointer flex items-center gap-2"
+                  >
+                    Explorar Programas 2026 <ArrowRight className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => { setAuthMode('register'); setShowAuthModal(true); }}
+                    className="bg-[#008080] hover:bg-[#006666] text-white px-8 py-3.5 rounded-full font-black text-sm shadow-lg shadow-teal-700/25 hover:shadow-xl transition-all transform hover:-translate-y-0.5 cursor-pointer"
+                  >
+                    Registrarme como Docente
+                  </button>
+                  <button 
+                    onClick={() => { setTimeout(() => document.getElementById('cuadernos-seccion')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
+                    className="bg-white border-2 border-slate-300 hover:border-slate-400 text-slate-800 px-7 py-3 rounded-full font-black text-sm hover:bg-slate-50 transition-all cursor-pointer"
+                  >
+                    Ver Cuadernos 1° a 5°
+                  </button>
                 </div>
               </div>
 
-              {/* STATS / TRUST LOGROS */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {[
-                  { value: "15,000+", label: "Estudiantes formados" },
-                  { value: "350+", label: "Docentes certificados" },
-                  { value: "120+", label: "Colegios afiliados" },
-                  { value: "99.2%", label: "Satisfacción docente" }
-                ].map((stat, i) => (
-                  <div key={i} className="glass-panel text-center p-6 bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="text-3xl md:text-4xl font-black text-primary-dark">{stat.value}</div>
-                    <div className="text-xs md:text-sm text-gray-500 mt-1 font-medium">{stat.label}</div>
+              {/* 3D VIBRANT PROGRAM CARDS CAROUSEL (EDUCADOCENTE MIRROR) */}
+              <div className="relative py-2">
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <h3 className="text-xl font-black text-slate-900 tracking-tight">Programas Especializados</h3>
+                    <p className="text-xs text-slate-500">Formación continua certificada para docentes de religión y educación cívica.</p>
                   </div>
-                ))}
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => setVibrantCarouselIndex(prev => Math.max(0, prev - 1))}
+                      className="w-10 h-10 rounded-full bg-[#0284C7] hover:bg-[#0369A1] text-white flex items-center justify-center shadow-md hover:scale-105 transition-all cursor-pointer"
+                      title="Anterior"
+                    >
+                      <ChevronLeft className="w-6 h-6" />
+                    </button>
+                    <button 
+                      onClick={() => setVibrantCarouselIndex(prev => Math.min(3, prev + 1))}
+                      className="w-10 h-10 rounded-full bg-[#0284C7] hover:bg-[#0369A1] text-white flex items-center justify-center shadow-md hover:scale-105 transition-all cursor-pointer"
+                      title="Siguiente"
+                    >
+                      <ChevronRight className="w-6 h-6" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* 4 Glossy 3D Cards Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {[
+                    {
+                      id: 'ascenso',
+                      gradient: 'from-[#FF6B00] via-[#FF5400] to-[#E63946]',
+                      icon: '📊',
+                      title: 'ASCENSO DE ESCALA',
+                      badge: '¡INICIA AHORA!',
+                      desc: 'Preparación integral para la escala magisterial con casuística real.',
+                      linkText: 'Ver programa'
+                    },
+                    {
+                      id: 'nombramiento',
+                      gradient: 'from-[#7928CA] via-[#8B5CF6] to-[#6366F1]',
+                      icon: '📜',
+                      title: 'NOMBRAMIENTO DOCENTE',
+                      badge: '¡INICIA AHORA!',
+                      desc: 'Alcanza tu plaza docente 2026-2027 con simulacros y asesoría especializada.',
+                      linkText: 'Ver programa'
+                    },
+                    {
+                      id: 'capacitacion',
+                      gradient: 'from-[#06B6D4] via-[#0D9488] to-[#047857]',
+                      icon: '📖',
+                      title: 'CAPACITACIÓN ENLA 2026',
+                      badge: '¡INICIA AHORA!',
+                      desc: 'Didáctica, ética y aula virtual interactiva con 120 horas pedagógicas.',
+                      linkText: 'Ver programa'
+                    },
+                    {
+                      id: 'autoria',
+                      gradient: 'from-[#F59E0B] via-[#D97706] to-[#B45309]',
+                      icon: '📚',
+                      title: 'AUTORÍA DE LIBRO Y CUADERNOS',
+                      badge: '¡INICIA AHORA!',
+                      desc: 'Cuadernos de trabajo estructurados de 1° a 5° para el docente y alumno.',
+                      linkText: 'Ver programa'
+                    }
+                  ].map((card, idx) => (
+                    <div 
+                      key={card.id} 
+                      className={`group relative flex flex-col justify-between rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden text-white bg-gradient-to-b ${card.gradient} ${vibrantCarouselIndex === idx ? 'ring-4 ring-yellow-400/80 shadow-2xl scale-[1.02]' : 'opacity-95'}`}
+                    >
+                      {/* Shimmer light bubble */}
+                      <div className="absolute -top-12 -right-12 w-32 h-32 bg-white/20 rounded-full blur-2xl group-hover:scale-150 transition-transform"></div>
+
+                      <div className="relative z-10 flex flex-col items-center text-center space-y-3">
+                        <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-3xl shadow-inner border border-white/30 group-hover:scale-110 transition-transform">
+                          {card.icon}
+                        </div>
+                        <h4 className="font-black text-xl leading-tight tracking-tight text-white drop-shadow-sm min-h-[50px] flex items-center justify-center">
+                          {card.title}
+                        </h4>
+                        <span className="inline-block bg-[#FACC15] text-slate-950 font-black text-[11px] px-3.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
+                          {card.badge}
+                        </span>
+                        <p className="text-xs text-white/95 font-medium leading-relaxed line-clamp-2">
+                          {card.desc}
+                        </p>
+                      </div>
+
+                      <div className="relative z-10 mt-6 pt-2 flex justify-center">
+                        <button 
+                          onClick={() => { setCurrentView('catalog'); setTimeout(() => document.getElementById('seccion-capacitaciones')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
+                          className="bg-[#008080] hover:bg-[#006666] text-white px-7 py-2.5 rounded-full text-xs font-black shadow-md hover:shadow-lg transition-all transform group-hover:scale-105 border border-teal-300/30 cursor-pointer"
+                        >
+                          {card.linkText}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pagination indicator dots */}
+                <div className="flex justify-center items-center gap-2 mt-5">
+                  {[0, 1, 2, 3].map((dot) => (
+                    <button
+                      key={dot}
+                      onClick={() => setVibrantCarouselIndex(dot)}
+                      className={`h-2 rounded-full transition-all cursor-pointer ${
+                        vibrantCarouselIndex === dot ? 'w-8 bg-[#008080]' : 'w-2 bg-slate-300 hover:bg-slate-400'
+                      }`}
+                      aria-label={`Slide ${dot + 1}`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* PROGRAMAS DE PREPARACIÓN (EDUCAAUGE MIRROR) */}
+              <div id="programas-preparacion" className="space-y-6 pt-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 border-b border-slate-200/80 pb-4">
+                  <div>
+                    <h3 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Programas de Preparación</h3>
+                    <p className="text-slate-500 text-sm font-medium mt-1">
+                      Nombramiento · Ascenso · Directivos · Cuadernos de Secundaria · 9 opciones
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => setCurrentView('catalog')}
+                    className="px-5 py-2 rounded-full border border-slate-300 text-slate-700 text-xs font-bold hover:border-[#E11D48] hover:text-[#E11D48] hover:bg-rose-50 transition-all flex items-center gap-1.5 cursor-pointer"
+                  >
+                    Ver todos (9) <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Filter Pills Bar (EducaAuge style) */}
+                <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                  {[
+                    { id: 'todos', label: 'Todos' },
+                    { id: 'ascenso', label: 'Ascenso de Escala Magisterial' },
+                    { id: 'nombramiento', label: 'Nombramiento Docente' },
+                    { id: 'directivos', label: 'Directivos y Especialistas' },
+                    { id: 'secundaria', label: 'Cuadernos 1° a 5°' }
+                  ].map(pill => (
+                    <button
+                      key={pill.id}
+                      onClick={() => setSelectedProgramFilter(pill.id as any)}
+                      className={`px-5 py-2 rounded-full text-xs md:text-sm font-bold shrink-0 transition-all cursor-pointer ${
+                        selectedProgramFilter === pill.id
+                          ? 'bg-[#E11D48] text-white shadow-md shadow-rose-500/25 border border-[#E11D48]'
+                          : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-400 hover:bg-slate-50'
+                      }`}
+                    >
+                      {pill.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Course Cards Grid (EducaAuge visual design) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[
+                    {
+                      badge: 'INTENSIVO',
+                      badgeBg: 'bg-[#F59E0B] text-slate-950',
+                      category: 'ascenso',
+                      img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop',
+                      title: 'Maratón Final – Ascenso 2026',
+                      desc: '¡Refuerza tus conocimientos y llega mejor preparado a tu evaluación con simulacros tipo MINEDU y resolución de casuísticas!',
+                      hours: '120 Horas',
+                      price: 120.00
+                    },
+                    {
+                      badge: 'ASCENSO',
+                      badgeBg: 'bg-[#10B981] text-white',
+                      category: 'ascenso',
+                      img: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=400&auto=format&fit=crop',
+                      title: 'Capacitación Metodológica en Educación Religiosa',
+                      desc: 'Estrategias innovadoras de enseñanza, dinámicas de grupo y uso de cuadernos de trabajo interactivos en el aula.',
+                      hours: '120 Horas Pedagógicas',
+                      price: 150.00
+                    },
+                    {
+                      badge: 'NOMBRAMIENTO',
+                      badgeBg: 'bg-[#EC4899] text-white',
+                      category: 'nombramiento',
+                      img: 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=400&auto=format&fit=crop',
+                      title: 'Nombramiento Docente 2026 – 2027',
+                      desc: 'Fortalece tus competencias pedagógicas para alcanzar tu plaza docente con clases en vivo y materiales actualizados.',
+                      hours: '200 Horas',
+                      price: 180.00
+                    }
+                  ]
+                  .filter(item => selectedProgramFilter === 'todos' || item.category === selectedProgramFilter)
+                  .map((item, idx) => (
+                    <div key={idx} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1.5 group flex flex-col justify-between">
+                      <div>
+                        <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+                          <span className={`absolute top-3 left-3 z-10 font-black text-[10px] px-3 py-1 rounded-md uppercase tracking-wider shadow-sm ${item.badgeBg}`}>
+                            {item.badge}
+                          </span>
+                          <img src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent"></div>
+                        </div>
+                        <div className="p-5 space-y-3">
+                          <h4 className="font-extrabold text-lg text-slate-900 leading-snug group-hover:text-[#E11D48] transition-colors">
+                            {item.title}
+                          </h4>
+                          <p className="text-xs text-slate-500 font-normal leading-relaxed line-clamp-2">
+                            {item.desc}
+                          </p>
+                          <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
+                            <Clock className="w-3.5 h-3.5 text-[#008080]" />
+                            <span>{item.hours}</span>
+                            <span>•</span>
+                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                            <span>Certificado QR</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-5 pt-0 border-t border-slate-100 flex items-center justify-between mt-3">
+                        <div className="text-lg font-black text-slate-900">
+                          S/. {item.price.toFixed(2)}
+                        </div>
+                        <button 
+                          onClick={() => { setAuthMode('register'); setShowAuthModal(true); }}
+                          className="bg-[#E11D48] hover:bg-[#BE123C] text-white px-5 py-2 rounded-full text-xs font-black shadow-md hover:shadow-lg transition-all cursor-pointer"
+                        >
+                          Inscribirme
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* AMAZON-STYLE WORKBOOKS SHOWCASE RIBBON (1° A 5° SECUNDARIA) */}
+              <div id="cuadernos-seccion" className="space-y-6 pt-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2 border-b border-slate-200 pb-3">
+                  <div>
+                    <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 uppercase tracking-widest">
+                      <Flame className="w-4 h-4 fill-amber-500 text-amber-500" /> Cuadernos de Trabajo Escolar
+                    </div>
+                    <h3 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Colección Creciendo Juntos por Grados</h3>
+                    <p className="text-slate-500 text-sm">Doctrina, actividades prácticas y autoevaluación de 1° a 5° de secundaria.</p>
+                  </div>
+                  <button 
+                    onClick={() => { setCurrentView('catalog'); setTimeout(() => document.getElementById('seccion-libros')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
+                    className="text-xs font-bold text-[#E11D48] hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    Ver catálogo completo <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Amazon Cards Ribbon */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
+                  {[
+                    { grade: 1, headerColor: 'bg-rose-600', title: '1° de Secundaria', verse: '"Dios creó los Cielos..." (Gén 1,1)', img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop', digital: 35, physical: 65, discount: '-16%' },
+                    { grade: 2, headerColor: 'bg-indigo-600', title: '2° de Secundaria', verse: '"Ustedes son mis amigos..." (Jn 15,14)', img: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=300&auto=format&fit=crop', digital: 35, physical: 65, discount: '-12%' },
+                    { grade: 3, headerColor: 'bg-teal-600', title: '3° de Secundaria', verse: '"Que todos sean uno..." (Jn 17,21)', img: 'https://images.unsplash.com/photo-1548623917-2fbf0f12c93b?q=80&w=300&auto=format&fit=crop', digital: 40, physical: 70, discount: 'PROMO' },
+                    { grade: 4, headerColor: 'bg-cyan-700', title: '4° de Secundaria', verse: '"Ven y sígueme" (Lc 5,27)', img: 'https://images.unsplash.com/photo-1509021436665-8f07dbf5bf1d?q=80&w=300&auto=format&fit=crop', digital: 40, physical: 70, discount: 'PROMO' },
+                    { grade: 5, headerColor: 'bg-amber-600', title: '5° de Secundaria', verse: '"Ustedes son sal..." (Mt 5,13)', img: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=300&auto=format&fit=crop', digital: 45, physical: 75, discount: 'PROMO' }
+                  ].map(b => (
+                    <div key={b.grade} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1.5 flex flex-col justify-between group">
+                      <div>
+                        {/* Header ribbon */}
+                        <div className={`${b.headerColor} text-white px-3 py-1.5 flex justify-between items-center text-[11px] font-black tracking-wide`}>
+                          <span>{b.title}</span>
+                          <span className="bg-yellow-400 text-slate-900 px-1.5 py-0.2 rounded text-[9px] font-extrabold">{b.discount}</span>
+                        </div>
+                        
+                        {/* Cover with delivery gratis tag */}
+                        <div className="relative h-44 w-full overflow-hidden bg-slate-50">
+                          <span className="absolute top-2 right-2 bg-yellow-400 text-slate-950 text-[9px] font-black px-2 py-0.5 rounded-full z-10 shadow-sm">
+                            DELIVERY GRATIS
+                          </span>
+                          <img src={b.img} alt={b.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        </div>
+
+                        <div className="p-3.5 space-y-1.5">
+                          <h5 className="font-extrabold text-sm text-slate-900 leading-snug">{b.title}</h5>
+                          <p className="text-[11px] text-amber-700 italic font-semibold line-clamp-1">{b.verse}</p>
+                          <div className="flex justify-between items-center text-xs pt-1 border-t border-slate-100">
+                            <div>
+                              <span className="text-[9px] text-slate-400 block">Digital</span>
+                              <span className="font-black text-[#E11D48]">S/. {b.digital.toFixed(2)}</span>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-[9px] text-slate-400 block">Físico</span>
+                              <span className="font-black text-slate-700">S/. {b.physical.toFixed(2)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-3 pt-0 grid grid-cols-2 gap-1.5">
+                        <button 
+                          onClick={() => {
+                            const found = books.find(item => item.grade === b.grade);
+                            if (found) addToCart(found, 'digital');
+                            else alert(`Agregado formato digital de ${b.title}`);
+                          }}
+                          className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-bold py-1.5 rounded-lg text-center cursor-pointer transition-colors"
+                        >
+                          DIGITAL
+                        </button>
+                        <button 
+                          onClick={() => {
+                            const found = books.find(item => item.grade === b.grade);
+                            if (found) addToCart(found, 'physical');
+                            else alert(`Agregado formato físico de ${b.title}`);
+                          }}
+                          className="bg-yellow-400 hover:bg-yellow-500 text-slate-950 text-[10px] font-black py-1.5 rounded-lg text-center cursor-pointer transition-colors"
+                        >
+                          FÍSICO
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* SIMULACROS & BANNER INTERACTIVO (GRUPO AUGE STYLE) */}
+              <div id="simulacros-seccion" className="bg-gradient-to-r from-slate-900 via-slate-800 to-rose-950 text-white rounded-3xl p-8 md:p-12 shadow-xl relative overflow-hidden">
+                <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-radial from-rose-500/20 to-transparent pointer-events-none"></div>
+                <div className="relative z-10 max-w-2xl space-y-4">
+                  <div className="inline-flex items-center gap-1.5 bg-yellow-400 text-slate-950 font-black text-xs px-3 py-1 rounded-full uppercase">
+                    <Sparkles className="w-3.5 h-3.5" /> Simulacros en Vivo 2026
+                  </div>
+                  <h3 className="text-3xl md:text-4xl font-black text-yellow-400 leading-tight">
+                    SIMULACROS EXIGENTES Y RETROALIMENTACIÓN INMEDIATA
+                  </h3>
+                  <p className="text-slate-300 text-sm md:text-base leading-relaxed">
+                    Mide tu nivel académico con cronómetro en tiempo real, preguntas de casuística alineadas al Currículo Nacional y calificación automática en el aula virtual.
+                  </p>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-200 pt-2 font-medium">
+                    <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-400" /> Cronómetro oficial por módulo</li>
+                    <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-400" /> Calificación inmediata sobre 20</li>
+                    <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-400" /> Clases de resolución grabadas</li>
+                    <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-400" /> Ranking pedagógico institucional</li>
+                  </ul>
+                  <div className="pt-2">
+                    <button 
+                      onClick={() => { setAuthMode('register'); setShowAuthModal(true); }}
+                      className="bg-yellow-400 hover:bg-yellow-500 text-slate-950 px-8 py-3 rounded-full font-black text-sm shadow-md hover:scale-105 transition-all cursor-pointer"
+                    >
+                      Empezar Simulacro Gratuito
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* REELS / VIDEO CLIPS INTERACTIVOS */}
               <div className="space-y-6">
                 <div className="text-center md:text-left space-y-2">
-                  <h3 className="text-3xl font-black text-gray-800 tracking-tight">Experiencia Creciendo Juntos en Acción</h3>
-                  <p className="text-gray-500 max-w-xl">Observa pequeños fragmentos de nuestras sesiones dinámicas y testimonios en video.</p>
+                  <h3 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Experiencia Creciendo Juntos en Acción</h3>
+                  <p className="text-slate-500 text-sm max-w-xl">Observa pequeños fragmentos de nuestras sesiones dinámicas y testimonios en video.</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                   {[
@@ -1028,7 +1418,7 @@ export default function App() {
                       
                       {/* Reel Metadata */}
                       <div className="absolute bottom-4 left-4 right-4 text-white space-y-1">
-                        <div className="text-xs text-teal-400 font-bold uppercase tracking-wider">{reel.duration}</div>
+                        <div className="text-xs text-[#008080] font-bold uppercase tracking-wider">{reel.duration}</div>
                         <h4 className="font-extrabold text-base leading-tight">{reel.title}</h4>
                       </div>
                     </div>
@@ -1040,7 +1430,7 @@ export default function App() {
               {activeReelIndex !== null && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
                   <div className="relative w-full max-w-md bg-black rounded-3xl overflow-hidden shadow-2xl animate-scale-up">
-                    <button className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white text-xl flex items-center justify-center" onClick={() => setActiveReelIndex(null)}>×</button>
+                    <button className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white text-xl flex items-center justify-center cursor-pointer" onClick={() => setActiveReelIndex(null)}>×</button>
                     <video 
                       controls 
                       autoPlay 
@@ -1051,138 +1441,73 @@ export default function App() {
                 </div>
               )}
 
-              {/* PRODUCTS & CATALOG HIGHLIGHTS SECTION */}
-              <div className="space-y-8">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-                  <div>
-                    <h3 className="text-3xl font-black text-gray-800 tracking-tight">Nuestros Cuadernos de Trabajo</h3>
-                    <p className="text-gray-500">Material didáctico estructurado de primer nivel para cada grado de secundaria.</p>
-                  </div>
-                  <button className="btn btn-secondary flex items-center gap-1.5 font-bold" onClick={() => setCurrentView('catalog')}>
-                    Ver Catálogo Completo <ArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {[
-                    { grade: 1, title: "Creciendo Juntos 1° de Secundaria", desc: "Introducción a los fundamentos de la fe, valores familiares y moral básica.", price: 45.00, img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=400&auto=format&fit=crop" },
-                    { grade: 3, title: "Creciendo Juntos 3° de Secundaria", desc: "El rol de la fe en la juventud contemporánea, historia eclesial y valores cívicos.", price: 45.00, img: "https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=400&auto=format&fit=crop", best: true },
-                    { grade: 5, title: "Creciendo Juntos 5° de Secundaria", desc: "Preparación moral y ética para el egreso escolar y proyecto de vida cristiano.", price: 45.00, img: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=400&auto=format&fit=crop" }
-                  ].map((book, i) => (
-                    <div key={i} className="glass-panel group overflow-hidden bg-white border border-gray-100 flex flex-col hover:shadow-premium transform hover:-translate-y-1 transition-all duration-300">
-                      <div className="relative aspect-video overflow-hidden bg-gray-100">
-                        {book.best && (
-                          <span className="absolute top-3 right-3 z-10 bg-yellow-500 text-gray-900 font-extrabold text-xs px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
-                            <Star className="w-3 h-3 fill-gray-900" /> RECOMENDADO
-                          </span>
-                        )}
-                        <img src={book.img} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                      </div>
-                      <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
-                        <div className="space-y-2">
-                          <span className="text-2xs font-extrabold tracking-widest text-teal-600 uppercase font-mono">{book.grade}° Grado de Secundaria</span>
-                          <h4 className="font-extrabold text-lg text-slate-800 leading-snug group-hover:text-primary transition-colors">{book.title}</h4>
-                          <p className="text-gray-500 text-xs leading-relaxed line-clamp-2">{book.desc}</p>
-                        </div>
-                        <div className="flex justify-between items-center pt-2">
-                          <span className="text-xl font-black text-primary-dark">S/ {book.price.toFixed(2)}</span>
-                          <button className="btn btn-secondary text-2xs py-2 px-4 font-bold border border-gray-200 group-hover:border-primary group-hover:bg-primary group-hover:text-white transition-all" onClick={() => setCurrentView('catalog')}>
-                            Explorar Detalle
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* SEMINARIOS / TRAINING BANNER */}
-              <div id="seccion-capacitaciones" className="bg-gradient-to-r from-teal-500 to-indigo-600 rounded-3xl p-8 md:p-12 text-white flex flex-col md:flex-row items-center gap-8 shadow-lg">
-                <div className="flex-1 space-y-4">
-                  <span className="bg-white/20 text-white font-extrabold text-2xs px-3.5 py-1 rounded-full uppercase tracking-wider">Capacitaciones Docentes</span>
-                  <h3 className="text-3xl font-black leading-tight">Seminario de Didáctica, Ética y Juventud 2026</h3>
-                  <p className="text-teal-50/90 text-sm md:text-base leading-relaxed">
-                    Potencia tus clases de Educación Religiosa con herramientas de aula virtual, dinámicas de valores y descarga de tu certificado validado con firma y código QR al finalizar.
-                  </p>
-                  <div className="flex flex-wrap gap-x-6 gap-y-2 pt-2 text-xs md:text-sm font-semibold">
-                    <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-yellow-300" /> 100% Virtual</span>
-                    <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-yellow-300" /> 120 Horas Pedagógicas</span>
-                    <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-yellow-300" /> Certificado con Código QR</span>
-                  </div>
-                </div>
-                <div className="flex flex-col items-center md:items-end justify-center min-w-[200px] space-y-3">
-                  <button className="btn bg-white hover:bg-teal-50 text-indigo-700 font-extrabold border-none shadow-md px-6 py-3.5 w-full transform hover:scale-105 transition-all text-center" onClick={() => { setAuthMode('register'); setShowAuthModal(true); }}>
-                    Inscribirme Gratis
-                  </button>
-                  <button className="text-xs text-white/90 hover:underline hover:text-white transition-colors" onClick={() => setCurrentView('verify-cert')}>
-                    Verificar mi certificado anterior
-                  </button>
-                </div>
-              </div>
-
               {/* TESTIMONIALS */}
-              <div className="space-y-8 text-center">
-                <h3 className="text-3xl font-black text-gray-800 tracking-tight">¿Qué dicen los Colegios y Docentes?</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div id="testimonios-seccion" className="space-y-8 text-center pt-6">
+                <div>
+                  <h3 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">¿Qué dicen los Colegios y Docentes?</h3>
+                  <p className="text-slate-500 text-sm mt-1">Más de 15,000 estudiantes y 350 docentes formados en valores con nuestra colección.</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {[
                     { quote: "La integración del aula virtual ha facilitado el control de tareas y la participación. Los alumnos disfrutan mucho la lectura digital.", author: "Prof. María Elena Rivas", role: "Docente de Religión - Colegio Santa Ana" },
                     { quote: "Los certificados QR y las capacitaciones de la Colección son excelentes y totalmente oficiales. La metodología es sumamente didáctica.", author: "Lic. Carlos Alberto Torres", role: "Director Pedagógico - IEP San Agustín" },
                     { quote: "Libros impresos de excelente calidad con ilustraciones hermosas y actividades muy bien pensadas para los adolescentes de hoy.", author: "Prof. Juana Inés Cruz", role: "Docente de 1° a 5° - Colegio Fe y Alegría" }
                   ].map((t, idx) => (
-                    <div key={idx} className="glass-panel p-8 bg-white border border-gray-100 shadow-sm relative flex flex-col justify-between hover:shadow-md transition-shadow duration-300">
-                      <div className="text-yellow-400 flex justify-center gap-1 mb-4">
+                    <div key={idx} className="bg-white p-7 rounded-2xl border border-slate-200 shadow-sm relative flex flex-col justify-between hover:shadow-md transition-shadow duration-300 text-left">
+                      <div className="text-yellow-400 flex gap-1 mb-4">
                         {[1, 2, 3, 4, 5].map(s => <Star key={s} className="w-4 h-4 fill-yellow-400" />)}
                       </div>
-                      <p className="text-gray-600 text-sm italic leading-relaxed">"{t.quote}"</p>
-                      <div className="mt-6 border-t border-gray-50 pt-4">
-                        <h5 className="font-extrabold text-sm text-slate-800">{t.author}</h5>
-                        <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">{t.role}</p>
+                      <p className="text-slate-600 text-sm italic leading-relaxed">"{t.quote}"</p>
+                      <div className="mt-6 border-t border-slate-100 pt-4">
+                        <h5 className="font-extrabold text-sm text-slate-900">{t.author}</h5>
+                        <p className="text-[10px] text-slate-400 uppercase tracking-wider mt-0.5 font-bold">{t.role}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* WHATSAPP FLOAT BUTTON WITH LIVE CLICK COUNTER */}
-              <div className="bg-emerald-50 rounded-3xl p-8 border border-emerald-100 flex flex-col md:flex-row justify-between items-center gap-6 shadow-sm">
-                <div className="space-y-2 text-center md:text-left">
-                  <h4 className="text-xl font-extrabold text-emerald-800 flex items-center justify-center md:justify-start gap-2">
-                    <Phone className="w-5 h-5 fill-emerald-800" /> ¿Necesitas atención por WhatsApp?
-                  </h4>
-                  <p className="text-emerald-700/80 text-sm max-w-xl">
-                    Chatea en vivo con nuestros asesores para pedidos institucionales, libros y material para colegios. 
-                  </p>
-                </div>
-                <div className="flex flex-col items-center gap-2">
-                  <button className="btn bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold border-none shadow-md px-6 py-3 flex items-center gap-2 transform hover:scale-105 transition-all" onClick={handleWaClick}>
-                    <span>Conversar ahora</span>
-                    <span className="bg-emerald-800 text-white px-2 py-0.5 rounded-full text-xs font-mono">{waInteractions} clics</span>
-                  </button>
-                  <span className="text-emerald-700 text-3xs font-mono uppercase tracking-wider">Contador de consultas activo</span>
-                </div>
+              {/* FLOATING WHATSAPP PILL (EXACT MIRROR OF EDUCAAUGE IN IMAGE 1) */}
+              <div className="fixed bottom-6 left-6 z-50 animate-float-gentle">
+                <button 
+                  onClick={handleWaClick}
+                  className="group flex items-center bg-[#E11D48] hover:bg-[#BE123C] text-white pl-1.5 pr-5 py-1.5 rounded-full shadow-2xl hover:shadow-glow-red transition-all duration-300 transform hover:scale-105 cursor-pointer border-2 border-white"
+                >
+                  <div className="w-11 h-11 rounded-full bg-[#25D366] flex items-center justify-center text-white shadow-md mr-3">
+                    <Phone className="w-6 h-6 fill-white text-[#25D366]" />
+                  </div>
+                  <div className="text-left leading-tight">
+                    <div className="text-[11px] font-bold text-rose-100 leading-tight">¿Necesitas ayuda?</div>
+                    <div className="text-xs font-black text-white tracking-tight flex items-center gap-1.5">
+                      <span>¡Escríbenos por WhatsApp!</span>
+                      <span className="bg-white/20 text-white text-[9px] px-1.5 py-0.2 rounded-full font-mono">{waInteractions}</span>
+                    </div>
+                  </div>
+                </button>
               </div>
 
               {/* INTERACTIVE CHATBOOK (FAST CONTACT MODAL) */}
               <div className="fixed bottom-6 right-6 z-40">
                 {!chatOpen ? (
-                  <button className="w-14 h-14 bg-primary hover:bg-primary-dark text-white rounded-full flex items-center justify-center shadow-premium transform hover:scale-110 transition-all cursor-pointer animate-bounce" onClick={() => setChatOpen(true)}>
+                  <button className="w-14 h-14 bg-[#008080] hover:bg-[#006666] text-white rounded-full flex items-center justify-center shadow-premium transform hover:scale-110 transition-all cursor-pointer animate-bounce" onClick={() => setChatOpen(true)} title="Chat de atención">
                     <MessageSquare className="w-6 h-6" />
                   </button>
                 ) : (
-                  <div className="w-80 md:w-96 bg-white rounded-3xl shadow-premium border border-gray-100 overflow-hidden flex flex-col max-h-[450px] animate-slide-up">
+                  <div className="w-80 md:w-96 bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[450px] animate-slide-up">
                     {/* Chat Header */}
-                    <div className="bg-primary text-white p-4 flex justify-between items-center">
+                    <div className="bg-[#008080] text-white p-4 flex justify-between items-center">
                       <div className="flex items-center gap-2">
                         <div className="w-2.5 h-2.5 bg-green-400 rounded-full animate-ping"></div>
                         <h4 className="font-extrabold text-sm">Asistente Creciendo Juntos</h4>
                       </div>
-                      <button className="text-white hover:text-gray-200 text-lg font-light" onClick={() => setChatOpen(false)}>×</button>
+                      <button className="text-white hover:text-gray-200 text-lg font-light cursor-pointer" onClick={() => setChatOpen(false)}>×</button>
                     </div>
 
                     {/* Chat Messages */}
                     <div className="flex-1 p-4 space-y-3 overflow-y-auto max-h-[280px] text-xs">
                       {chatMessages.map((msg, i) => (
                         <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`p-3 rounded-2xl max-w-[80%] leading-relaxed shadow-sm ${msg.sender === 'user' ? 'bg-primary text-white rounded-tr-none' : 'bg-gray-100 text-gray-700 rounded-tl-none'}`}>
+                          <div className={`p-3 rounded-2xl max-w-[80%] leading-relaxed shadow-sm ${msg.sender === 'user' ? 'bg-[#E11D48] text-white rounded-tr-none' : 'bg-slate-100 text-slate-700 rounded-tl-none'}`}>
                             {msg.text}
                           </div>
                         </div>
@@ -1190,22 +1515,22 @@ export default function App() {
                     </div>
 
                     {/* Chat Quick Options Footer */}
-                    <div className="bg-gray-50 p-3 border-t border-gray-100 space-y-1.5">
-                      <div className="text-[10px] text-gray-400 uppercase font-mono tracking-wider mb-1 px-1">Respuestas rápidas:</div>
+                    <div className="bg-slate-50 p-3 border-t border-slate-100 space-y-1.5">
+                      <div className="text-[10px] text-slate-400 uppercase font-mono tracking-wider mb-1 px-1">Respuestas rápidas:</div>
                       <div className="flex flex-wrap gap-1.5">
-                        <button className="bg-white hover:bg-primary-light text-primary border border-gray-100 hover:border-primary-light text-3xs px-2 py-1.5 rounded-full transition-colors" onClick={() => handleChatOption(
+                        <button className="bg-white hover:bg-rose-50 text-[#E11D48] border border-slate-200 hover:border-rose-200 text-3xs px-2.5 py-1.5 rounded-full transition-colors cursor-pointer" onClick={() => handleChatOption(
                           '¿Cómo comprar?', 
-                          'Puedes comprar los libros impresos y digitales seleccionando la opción "Libros" del menú superior y agregando el producto al carrito. Aceptamos depósitos y tarjetas de crédito.'
+                          'Puedes comprar los libros seleccionando la opción "Cuadernos 1° a 5°" y eligiendo entre Compra Digital o Física. Aceptamos depósitos y tarjetas.'
                         )}>🛍️ ¿Cómo comprar?</button>
-                        <button className="bg-white hover:bg-primary-light text-primary border border-gray-100 hover:border-primary-light text-3xs px-2 py-1.5 rounded-full transition-colors" onClick={() => handleChatOption(
+                        <button className="bg-white hover:bg-rose-50 text-[#E11D48] border border-slate-200 hover:border-rose-200 text-3xs px-2.5 py-1.5 rounded-full transition-colors cursor-pointer" onClick={() => handleChatOption(
                           '¿Tienen demostración?', 
-                          '¡Sí! En los módulos del curso, nuestros docentes y estudiantes pueden visualizar los temas, ver videos instructivos de YouTube y descargar fragmentos en PDF.'
+                          '¡Sí! En los módulos del curso, nuestros docentes y estudiantes pueden visualizar los temas, ver videos de YouTube y descargar fragmentos en PDF.'
                         )}>📚 ¿Demostración?</button>
-                        <button className="bg-white hover:bg-primary-light text-primary border border-gray-100 hover:border-primary-light text-3xs px-2 py-1.5 rounded-full transition-colors" onClick={() => handleChatOption(
+                        <button className="bg-white hover:bg-rose-50 text-[#E11D48] border border-slate-200 hover:border-rose-200 text-3xs px-2.5 py-1.5 rounded-full transition-colors cursor-pointer" onClick={() => handleChatOption(
                           '¿El certificado es oficial?', 
                           '¡Totalmente! Los certificados emitidos tienen 120 horas pedagógicas oficiales y un código QR único con el cual cualquier institución puede validar su autenticidad.'
                         )}>🎓 ¿Certificado oficial?</button>
-                        <button className="bg-white hover:bg-primary-light text-primary border border-gray-100 hover:border-primary-light text-3xs px-2 py-1.5 rounded-full transition-colors" onClick={() => handleChatOption(
+                        <button className="bg-white hover:bg-rose-50 text-[#E11D48] border border-slate-200 hover:border-rose-200 text-3xs px-2.5 py-1.5 rounded-full transition-colors cursor-pointer" onClick={() => handleChatOption(
                           'Hablar con un asesor', 
                           'Te redirigiré al WhatsApp oficial de soporte de inmediato para una asistencia personalizada.'
                         )}>💬 Hablar con Asesor</button>
