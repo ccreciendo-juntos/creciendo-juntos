@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "deploy:pages": "npm run build && wrangler pages deploy dist --project-name creciendo-juntos",
     "lint": "eslint .",
     "preview": "vite preview"
   },
