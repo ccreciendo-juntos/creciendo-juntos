@@ -10,6 +10,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { jsPDF } from 'jspdf';
 import { request } from './services/api';
 import { TeacherVeloxDashboard } from './components/velox/TeacherVeloxDashboard';
+import { NovaClassworkManager } from './components/nova/NovaClassworkManager';
 
 // Interface types
 interface UserData {
@@ -20,6 +21,8 @@ interface UserData {
   phone?: string;
   document_type?: string;
   document_number?: string;
+  grade?: number;
+  section?: string;
 }
 
 interface Book {
@@ -664,6 +667,9 @@ export default function App() {
     setNewQuestionOptions(['', '', '', '']);
     setNewQuestionCorrect('0');
   };
+
+  // Legacy assessment handlers referenced for Nova migration
+  void [showCreateAssessment, setNewQuestionType, studentAssessments, handleCreateAssessment, addQuestionToForm];
 
   const handleOpenGrading = async (assessmentId: string) => {
     const assessment = classroomAssessments.find(a => a.id === assessmentId);
@@ -2437,155 +2443,12 @@ export default function App() {
 
                       {classroomTab === 'assessments' && (
                         <div className="space-y-6 animate-fade-in">
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <h4 className="font-bold text-lg text-gray-800">Evaluaciones, Cuestionarios y Tareas</h4>
-                              <p className="text-xs text-gray-500">Cree evaluaciones para su aula y realice el seguimiento de entregas.</p>
-                            </div>
-                            <button className="btn btn-primary text-xs px-3 py-1.5" onClick={() => { setAssessmentForm({ title: '', type: 'quiz', startAt: new Date().toISOString().slice(0,16), endAt: new Date(Date.now() + 7*24*3600*1000).toISOString().slice(0,16), maxScore: 20, questions: [], image_url: '' }); setShowCreateAssessment(true); }}>+ Crear Cuestionario / Tarea</button>
-                          </div>
-
-                          {showCreateAssessment && (
-                            <div className="fixed inset-0 bg-black/45 backdrop-blur-xs flex justify-center items-center z-50 p-4 animate-fade-in">
-                              <form className="glass-panel w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 md:p-8 bg-white space-y-4 rounded-2xl shadow-premium relative animate-slide-up" onSubmit={handleCreateAssessment}>
-                                <div className="flex justify-between items-center pb-2 border-b border-gray-155">
-                                  <h3 className="font-extrabold text-xl text-gray-800 font-sans">Nuevo Cuestionario / Tarea</h3>
-                                  <button type="button" className="text-2xl font-light hover:text-gray-500 cursor-pointer" onClick={() => setShowCreateAssessment(false)}>×</button>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  <div className="form-group">
-                                    <label className="form-label text-xs font-bold">Título de la Evaluación</label>
-                                    <input type="text" className="form-control" placeholder="Ej. Examen Mensual - Unidad 1" value={assessmentForm.title} onChange={(e) => setAssessmentForm({ ...assessmentForm, title: e.target.value })} required />
-                                  </div>
-                                  <div className="form-group">
-                                    <label className="form-label text-xs font-bold">Tipo</label>
-                                    <select className="form-control" value={assessmentForm.type} onChange={(e) => setAssessmentForm({ ...assessmentForm, type: e.target.value })}>
-                                      <option value="quiz">Cuestionario (Quiz)</option>
-                                      <option value="exam">Examen Escrito</option>
-                                      <option value="task">Tarea / Trabajo Abierto</option>
-                                    </select>
-                                  </div>
-                                  <div className="form-group">
-                                    <label className="form-label text-xs font-bold">Fecha Límite (Entrega)</label>
-                                    <input type="datetime-local" className="form-control" value={assessmentForm.endAt} onChange={(e) => setAssessmentForm({ ...assessmentForm, endAt: e.target.value })} required />
-                                  </div>
-                                  <div className="form-group">
-                                    <label className="form-label text-xs font-bold">Puntaje Máximo</label>
-                                    <input type="number" className="form-control" value={assessmentForm.maxScore} onChange={(e) => setAssessmentForm({ ...assessmentForm, maxScore: parseInt(e.target.value) })} />
-                                  </div>
-                                </div>
-
-                                <div className="form-group">
-                                  <label className="form-label text-xs font-bold">Imagen de Referencia / Adjunto (URL o Subir archivo)</label>
-                                  <div className="flex flex-col gap-2">
-                                    <div className="flex gap-2">
-                                      <input type="text" className="form-control flex-1 text-xs" value={assessmentForm.image_url || ''} onChange={(e) => setAssessmentForm({ ...assessmentForm, image_url: e.target.value })} placeholder="URL de la imagen de referencia..." />
-                                      <label className="btn btn-secondary text-xs shrink-0 cursor-pointer flex items-center justify-center gap-1">
-                                        <Upload className="w-4 h-4" /> Subir
-                                        <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, (url) => setAssessmentForm({ ...assessmentForm, image_url: url }))} />
-                                      </label>
-                                    </div>
-                                    {assessmentForm.image_url ? (
-                                      <div className="relative group border rounded-xl overflow-hidden shadow-2xs h-28 bg-gray-50 flex items-center justify-center">
-                                        <img src={assessmentForm.image_url} alt="Referencia" className="w-full h-full object-contain" />
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                          <button type="button" className="btn btn-secondary text-2xs py-1 px-2.5 bg-white text-gray-800" onClick={() => setAssessmentForm({ ...assessmentForm, image_url: '' })}>Eliminar</button>
-                                        </div>
-                                      </div>
-                                    ) : (
-                                      <div className="border-2 border-dashed border-gray-250 hover:border-primary/50 transition-all rounded-xl p-3 bg-gray-50/50 flex flex-col items-center justify-center gap-1 group cursor-pointer relative">
-                                        <Upload className="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" />
-                                        <span className="text-2xs text-gray-500 font-medium">Subir imagen de referencia desde PC</span>
-                                        <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleImageUpload(e, (url) => setAssessmentForm({ ...assessmentForm, image_url: url }))} />
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-
-                                <div className="border-t border-gray-100 pt-4 space-y-4">
-                                  <h5 className="font-bold text-sm text-gray-800">Preguntas del Cuestionario ({assessmentForm.questions.length})</h5>
-                                  
-                                  <div className="bg-gray-50 p-4 rounded-xl space-y-3 border border-gray-155">
-                                    <div className="form-group">
-                                      <label className="form-label text-xs font-bold">Pregunta</label>
-                                      <input type="text" className="form-control" placeholder="Ej. ¿Qué es la fe?" value={newQuestionText} onChange={(e) => setNewQuestionText(e.target.value)} />
-                                    </div>
-                                    <div className="form-group">
-                                      <label className="form-label text-xs font-bold">Tipo de Pregunta</label>
-                                      <select className="form-control" value={newQuestionType} onChange={(e) => setNewQuestionType(e.target.value)}>
-                                        <option value="multiple_choice">Opción Múltiple (4 opciones)</option>
-                                        <option value="true_false">Verdadero / Falso</option>
-                                        <option value="open">Respuesta Abierta (Calificación manual)</option>
-                                      </select>
-                                    </div>
-
-                                    {newQuestionType === 'multiple_choice' && (
-                                      <div className="grid grid-cols-2 gap-2">
-                                        {newQuestionOptions.map((opt, oIdx) => (
-                                          <div key={oIdx} className="flex gap-1 items-center">
-                                            <span className="text-xs font-bold">{oIdx + 1}:</span>
-                                            <input type="text" className="form-control text-xs py-1" value={opt} onChange={(e) => {
-                                              const updated = [...newQuestionOptions];
-                                              updated[oIdx] = e.target.value;
-                                              setNewQuestionOptions(updated);
-                                            }} placeholder={`Opción ${oIdx + 1}`} />
-                                          </div>
-                                        ))}
-                                      </div>
-                                    )}
-
-                                    {newQuestionType !== 'open' && (
-                                      <div className="form-group">
-                                        <label className="form-label text-xs font-bold">Respuesta Correcta</label>
-                                        <select className="form-control" value={newQuestionCorrect} onChange={(e) => setNewQuestionCorrect(e.target.value)}>
-                                          {newQuestionType === 'multiple_choice' ? (
-                                            newQuestionOptions.map((_, oIdx) => <option key={oIdx} value={oIdx.toString()}>Opción {oIdx + 1}</option>)
-                                          ) : (
-                                            <>
-                                              <option value="Verdadero">Verdadero</option>
-                                              <option value="Falso">Falso</option>
-                                            </>
-                                          )}
-                                        </select>
-                                      </div>
-                                    )}
-
-                                    <button type="button" className="btn btn-secondary text-xs w-full py-1.5" onClick={addQuestionToForm}>+ Añadir Pregunta a la Evaluación</button>
-                                  </div>
-
-                                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                                    {assessmentForm.questions.map((q, qIdx) => (
-                                      <div key={qIdx} className="bg-white p-3 rounded-lg border text-xs flex justify-between items-center shadow-3xs">
-                                        <div>
-                                          <p className="font-bold">{qIdx + 1}. {q.text}</p>
-                                          <p className="text-gray-400 font-semibold">{q.type === 'multiple_choice' ? `Múltiple (${q.options.join(', ')})` : q.type === 'true_false' ? 'V/F' : 'Abierta'}</p>
-                                        </div>
-                                        <button type="button" className="text-error font-bold" onClick={() => setAssessmentForm({ ...assessmentForm, questions: assessmentForm.questions.filter((_, idx) => idx !== qIdx) })}>Eliminar</button>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-
-                                <button type="submit" className="btn btn-primary w-full py-3" disabled={assessmentForm.questions.length === 0 && assessmentForm.type === 'quiz'}>Asignar Evaluación al Aula</button>
-                              </form>
-                            </div>
-                          )}
-
-                          <div className="grid grid-cols-1 gap-4">
-                            {classroomAssessments.map(a => (
-                              <div key={a.id} className="glass-panel p-5 bg-white flex justify-between items-center">
-                                <div className="space-y-1">
-                                  <div className="flex gap-2 items-center">
-                                    <h5 className="font-bold text-slate-800">{a.title}</h5>
-                                    <span className="bg-primary-light text-primary text-3xs font-extrabold uppercase px-2 py-0.5 rounded-full">{a.type}</span>
-                                  </div>
-                                  <p className="text-xs text-gray-500">Fecha límite de entrega: <strong>{new Date(a.end_at).toLocaleString()}</strong></p>
-                                  <p className="text-xs text-gray-400 font-semibold">Puntaje máximo: {a.max_score} puntos | {a.questions_count} preguntas</p>
-                                </div>
-                                <button className="btn btn-secondary text-xs px-3 py-1.5" onClick={() => handleOpenGrading(a.id)}>Ver Entregas y Calificar</button>
-                              </div>
-                            ))}
-                          </div>
+                          <NovaClassworkManager
+                            role="docente"
+                            user={user}
+                            activeClassroomGrade={currentClassroom?.grade || 4}
+                            activeClassroomSection={currentClassroom?.section || 'B'}
+                          />
                         </div>
                       )}
 
@@ -2789,42 +2652,15 @@ export default function App() {
                     </div>
                   )}
 
-                  {/* Tareas y Evaluaciones del Alumno */}
+                  {/* Tareas y Evaluaciones del Alumno (Portal NOVA - Educación Religiosa) */}
                   <div className="space-y-4 pt-8 border-t border-gray-200">
-                    <h3 className="font-bold text-xl text-gray-800">Mis Evaluaciones y Tareas Pendientes</h3>
-                    <div className="grid grid-cols-1 gap-4">
-                      {studentAssessments.map(sa => (
-                        <div key={sa.id} className="glass-panel p-5 bg-white flex justify-between items-center">
-                          <div className="space-y-1">
-                            <div className="flex gap-2 items-center">
-                              <h5 className="font-bold text-slate-800">{sa.title}</h5>
-                              <span className="bg-primary-light text-primary text-3xs font-extrabold uppercase px-2 py-0.5 rounded-full">{sa.type}</span>
-                            </div>
-                            <p className="text-xs text-gray-500">Aula: {sa.classroom_name} | Vence el: <strong>{new Date(sa.end_at).toLocaleString()}</strong></p>
-                            {sa.my_grade ? (
-                              <div className="text-xs text-success font-bold mt-1">
-                                Calificación: {sa.my_grade.score} / {sa.max_score} puntos
-                                {sa.my_grade.feedback && <p className="text-3xs italic text-gray-400 font-normal">Retroalimentación: "{sa.my_grade.feedback}"</p>}
-                              </div>
-                            ) : (
-                              <span className="text-2xs bg-warning-light text-warning px-2.5 py-0.5 rounded-full font-bold uppercase inline-block mt-1">Pendiente</span>
-                            )}
-                          </div>
-                          {!sa.my_grade && (
-                            <button className="btn btn-primary text-xs px-4 py-2" onClick={async () => {
-                              const detail = await request(`/assessments/${sa.id}`);
-                              if (detail.success) {
-                                setActiveAssessmentForStudent(detail.data);
-                                setStudentAnswers({});
-                              }
-                            }}>Resolver Evaluación</button>
-                          )}
-                        </div>
-                      ))}
-                      {studentAssessments.length === 0 && (
-                        <p className="text-sm text-gray-400 italic">No tiene tareas ni evaluaciones asignadas en sus aulas.</p>
-                      )}
-                    </div>
+                    <h3 className="font-bold text-xl text-gray-800">Mis Evaluaciones y Tareas: Educación Religiosa</h3>
+                    <NovaClassworkManager
+                      role="estudiante"
+                      user={user}
+                      activeClassroomGrade={user.grade || 4}
+                      activeClassroomSection={user.section || 'B'}
+                    />
                   </div>
                 </div>
               )}
