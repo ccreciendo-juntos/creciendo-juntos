@@ -1,6 +1,4 @@
-const BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-  ? 'http://localhost:4000/api/v1' 
-  : 'https://creciendo-juntos-api.creciendojuntos.workers.dev/api/v1';
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://creciendo-juntos-api.creciendojuntos.workers.dev/api/v1';
 
 interface ApiResponse<T = any> {
   success: boolean;
