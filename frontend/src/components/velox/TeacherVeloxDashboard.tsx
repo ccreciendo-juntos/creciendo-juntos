@@ -13,7 +13,8 @@ import {
   ShieldCheck,
   Save,
   CheckCircle2,
-  CalendarDays
+  CalendarDays,
+  FolderOpen
 } from 'lucide-react';
 import type { StudentRecord } from './types';
 import { INITIAL_STUDENTS } from './initialStudents';
@@ -22,6 +23,7 @@ import { VeloxEvaluations } from './VeloxEvaluations';
 import { VeloxAttendance } from './VeloxAttendance';
 import { VeloxReports } from './VeloxReports';
 import { VeloxStudents } from './VeloxStudents';
+import { TeacherResourcesViewer } from './TeacherResourcesViewer';
 
 interface TeacherVeloxDashboardProps {
   user: {
@@ -44,7 +46,7 @@ export const TeacherVeloxDashboard: React.FC<TeacherVeloxDashboardProps> = ({
   originalClassroomsSection
 }) => {
   // Navigation active tab
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'evaluations' | 'attendance' | 'reports' | 'classrooms' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'evaluations' | 'attendance' | 'reports' | 'resources' | 'classrooms' | 'settings'>('dashboard');
 
   // Active Grade and Section for teacher
   const [selectedGrade, setSelectedGrade] = useState<number>(4);
@@ -201,7 +203,20 @@ export const TeacherVeloxDashboard: React.FC<TeacherVeloxDashboardProps> = ({
               <FileText className="w-4 h-4" /> Reportes
             </button>
 
-            {/* 6. Aulas y Materiales Creciendo Juntos */}
+            {/* 6. Recursos Pedagógicos Compartidos */}
+            <button
+              type="button"
+              onClick={() => setActiveTab('resources')}
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'resources'
+                  ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <FolderOpen className="w-4 h-4" /> Recursos y Unidades
+            </button>
+
+            {/* 7. Aulas y Materiales Creciendo Juntos */}
             <button
               type="button"
               onClick={() => setActiveTab('classrooms')}
@@ -503,6 +518,11 @@ export const TeacherVeloxDashboard: React.FC<TeacherVeloxDashboardProps> = ({
             teacherName={teacherProfile.name}
             institutionName={user.institution_name || '7053 Reino de España'}
           />
+        )}
+
+        {/* TAB 6B: RECURSOS Y UNIDADES COMPARTIDAS POR ADMIN */}
+        {activeTab === 'resources' && (
+          <TeacherResourcesViewer />
         )}
 
         {/* TAB 6: AULAS Y CUADERNOS (Creciendo Juntos original workspace) */}

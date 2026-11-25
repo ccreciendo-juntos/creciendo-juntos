@@ -10,6 +10,7 @@ import { listCourses, getCourseDetails, createCourse, getStudentCourses, complet
 import { createClassroom, listClassrooms, registerStudent, importStudents, getClassroomProgress, createAssessment, submitAssessment, gradeAssessment, getClassroomAssessments, getAssessmentDetails, getAssessmentSubmissions, getStudentAssessments } from './controllers/classrooms.controller';
 import { getAdminMetrics, getAuditLogs } from './controllers/reports.controller';
 import { listSchools, createSchool, listAdminUsers, createAdminUser, updateAdminUser, deleteAdminUser } from './controllers/adminUsers.controller';
+import { getSiteConfig, updateSiteConfig, listAdminResources, createAdminResource, updateAdminResource, deleteAdminResource, listTeacherResources } from './controllers/siteResources.controller';
 
 // JWT verification wrapper using jsonwebtoken with nodejs_compat
 import jwt from 'jsonwebtoken';
@@ -227,6 +228,15 @@ app.get('/api/v1/admin/users', expressToHono(listAdminUsers, true, ['admin', 'su
 app.post('/api/v1/admin/users', expressToHono(createAdminUser, true, ['admin', 'super_admin', 'admin_institucional']));
 app.put('/api/v1/admin/users/:id', expressToHono(updateAdminUser, true, ['admin', 'super_admin', 'admin_institucional']));
 app.delete('/api/v1/admin/users/:id', expressToHono(deleteAdminUser, true, ['admin', 'super_admin', 'admin_institucional']));
+
+// 10. CMS Página de Inicio y Repositorio de Recursos Pedagógicos
+app.get('/api/v1/site-config', expressToHono(getSiteConfig));
+app.put('/api/v1/admin/site-config', expressToHono(updateSiteConfig, true, ['admin', 'super_admin']));
+app.get('/api/v1/admin/resources', expressToHono(listAdminResources, true, ['admin', 'super_admin']));
+app.post('/api/v1/admin/resources', expressToHono(createAdminResource, true, ['admin', 'super_admin']));
+app.put('/api/v1/admin/resources/:id', expressToHono(updateAdminResource, true, ['admin', 'super_admin']));
+app.delete('/api/v1/admin/resources/:id', expressToHono(deleteAdminResource, true, ['admin', 'super_admin']));
+app.get('/api/v1/teacher/resources', expressToHono(listTeacherResources, true, ['docente', 'subdirector', 'auxiliar', 'admin_institucional', 'admin', 'super_admin']));
 
 // Root and Health Check
 app.all('/', (c) => {

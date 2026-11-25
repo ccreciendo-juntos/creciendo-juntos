@@ -333,6 +333,32 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   created_at TEXT NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
+
+-- 25. Site Config (Landing Page CMS)
+CREATE TABLE IF NOT EXISTS site_config (
+  id TEXT PRIMARY KEY,
+  config_json TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+-- 26. Pedagogical Resources (Admin shared documents for Religion teachers)
+CREATE TABLE IF NOT EXISTS pedagogical_resources (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  category TEXT NOT NULL,
+  file_type TEXT NOT NULL,
+  file_url TEXT NOT NULL,
+  file_name TEXT,
+  grade INTEGER DEFAULT 0,
+  area TEXT DEFAULT 'Educación Religiosa',
+  share_mode TEXT DEFAULT 'all_with_load',
+  shared_user_ids TEXT DEFAULT '[]',
+  is_active INTEGER DEFAULT 1,
+  created_by TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
 `;
 
 if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {

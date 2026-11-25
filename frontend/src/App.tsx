@@ -11,6 +11,9 @@ import { jsPDF } from 'jspdf';
 import { request } from './services/api';
 import { TeacherVeloxDashboard } from './components/velox/TeacherVeloxDashboard';
 import { AdminUsersVelox } from './components/velox/AdminUsersVelox';
+import { AdminLandingEditor } from './components/admin/AdminLandingEditor';
+import { AdminResourcesManager } from './components/admin/AdminResourcesManager';
+import { DEFAULT_LANDING_CONFIG, type LandingConfig } from './components/admin/landingConfig';
 import { NovaClassworkManager } from './components/nova/NovaClassworkManager';
 
 // Interface types
@@ -98,7 +101,16 @@ export default function App() {
   const [courseSearch, setCourseSearch] = useState('');
 
   // Tab Navigation States
-  const [adminTab, setAdminTab] = useState<'metrics' | 'books' | 'orders' | 'courses' | 'templates' | 'users' | 'audit'>('metrics');
+  const [adminTab, setAdminTab] = useState<'metrics' | 'books' | 'orders' | 'courses' | 'templates' | 'users' | 'resources' | 'landing_cms' | 'audit'>('metrics');
+  const [landingConfig, setLandingConfig] = useState<LandingConfig>(() => {
+    try {
+      const cached = localStorage.getItem('creciendo_landing_config');
+      if (cached) return { ...DEFAULT_LANDING_CONFIG, ...JSON.parse(cached) };
+    } catch {
+      // ignore
+    }
+    return DEFAULT_LANDING_CONFIG;
+  });
 
   // Cart State
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -196,6 +208,13 @@ export default function App() {
   useEffect(() => {
     fetchBooks();
     fetchCourses();
+    request('/site-config').then((res) => {
+      if (res.success && res.data) {
+        const merged = { ...DEFAULT_LANDING_CONFIG, ...res.data };
+        setLandingConfig(merged);
+        localStorage.setItem('creciendo_landing_config', JSON.stringify(merged));
+      }
+    }).catch(() => {});
     if (token) {
       fetchCurrentUser();
     }
@@ -907,15 +926,15 @@ export default function App() {
       <div className="bg-[#004D40] text-teal-100 text-[11px] font-medium py-1.5 px-4 border-b border-teal-900/40">
         <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-1.5">
           <div className="flex items-center gap-2">
-            <span className="bg-[#FACC15] text-slate-950 font-black px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider">OFICIAL</span>
-            <span>11 Años Formando Docentes y Estudiantes con Excelencia • 120 Horas Pedagógicas MINEDU</span>
+            <span className="bg-[#FACC15] text-slate-950 font-black px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider">{landingConfig.topBadge}</span>
+            <span>{landingConfig.topBannerText}</span>
           </div>
           <div className="flex items-center gap-4 text-[11px]">
-            <span className="hidden md:inline">🚚 Envíos físicos y licencias digitales a todo el Perú</span>
+            <span className="hidden md:inline">🚚 {landingConfig.topShippingText}</span>
             <button onClick={handleWaClick} className="hover:text-yellow-300 transition-colors flex items-center gap-1 cursor-pointer font-bold">
               <Phone className="w-3 h-3 text-emerald-400" /> WhatsApp Oficial
             </button>
-            <span className="hidden sm:inline">✉️ informes@creciendojuntos.com</span>
+            <span className="hidden sm:inline">✉️ {landingConfig.contactEmail}</span>
           </div>
         </div>
       </div>
@@ -930,8 +949,8 @@ export default function App() {
             </div>
             <div>
               <div className="text-[10px] font-black uppercase tracking-widest text-[#E11D48] leading-tight">COLECCIÓN</div>
-              <h1 className="text-xl font-black text-slate-900 tracking-tight leading-none">Creciendo Juntos</h1>
-              <span className="text-[10px] text-slate-500 font-semibold block leading-tight">Educación Religiosa Secundaria</span>
+              <h1 className="text-xl font-black text-slate-900 tracking-tight leading-none">{landingConfig.brandName}</h1>
+              <span className="text-[10px] text-slate-500 font-semibold block leading-tight">{landingConfig.brandSubtitle}</span>
             </div>
           </div>
 
@@ -1024,35 +1043,35 @@ export default function App() {
               {/* HERO SECTION - EDUCADOCENTE HEADLINE STYLE */}
               <div className="text-center max-w-4xl mx-auto space-y-4 pt-2">
                 <div className="inline-flex items-center gap-2 bg-[#F0FDFA] border border-[#0D9488]/30 text-[#006666] font-extrabold text-xs px-4 py-1.5 rounded-full uppercase tracking-wider shadow-sm">
-                  <Sparkles className="w-3.5 h-3.5 text-[#008080]" /> 11 Años Formando Docentes que Avanzan, Crecen y Logran Más
+                  <Sparkles className="w-3.5 h-3.5 text-[#008080]" /> {landingConfig.heroPill}
                 </div>
                 <h2 className="text-3xl md:text-5xl font-black text-slate-900 leading-[1.15] tracking-tight">
-                  11 años formando docentes que <span className="text-[#008080]">avanzan, crecen</span> y logran más.
+                  {landingConfig.heroTitleStart}<span className="text-[#008080]">{landingConfig.heroTitleHighlight}</span>{landingConfig.heroTitleEnd}
                 </h2>
                 <p className="text-slate-600 text-base md:text-lg max-w-2xl mx-auto font-normal leading-relaxed">
-                  Programas 100% prácticos, diseñados por expertos para fortalecer tu crecimiento docente y formar valores cívicos y morales en secundaria de 1° a 5°.
+                  {landingConfig.heroSubtitle}
                 </p>
                 <div className="inline-block bg-amber-50 border-l-4 border-amber-400 px-4 py-2 rounded-r-xl text-slate-700 text-xs italic font-medium">
-                  "Crean lo que aprenden, enseñen lo que creen y practiquen lo que enseñan." — San Agustín
+                  {landingConfig.heroQuote} — {landingConfig.heroQuoteAuthor}
                 </div>
                 <div className="flex flex-wrap justify-center gap-4 pt-2">
                   <button 
                     onClick={() => { setTimeout(() => document.getElementById('programas-preparacion')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
                     className="bg-[#E11D48] hover:bg-[#BE123C] text-white px-8 py-3.5 rounded-full font-black text-sm shadow-lg shadow-rose-500/25 hover:shadow-xl hover:shadow-rose-500/35 transition-all transform hover:-translate-y-0.5 cursor-pointer flex items-center gap-2"
                   >
-                    Explorar Programas 2026 <ArrowRight className="w-4 h-4" />
+                    {landingConfig.ctaPrimaryText} <ArrowRight className="w-4 h-4" />
                   </button>
                   <button 
                     onClick={() => { setAuthMode('register'); setShowAuthModal(true); }}
                     className="bg-[#008080] hover:bg-[#006666] text-white px-8 py-3.5 rounded-full font-black text-sm shadow-lg shadow-teal-700/25 hover:shadow-xl transition-all transform hover:-translate-y-0.5 cursor-pointer"
                   >
-                    Registrarme como Docente
+                    {landingConfig.ctaSecondaryText}
                   </button>
                   <button 
                     onClick={() => { setTimeout(() => document.getElementById('cuadernos-seccion')?.scrollIntoView({ behavior: 'smooth' }), 100); }}
                     className="bg-white border-2 border-slate-300 hover:border-slate-400 text-slate-800 px-7 py-3 rounded-full font-black text-sm hover:bg-slate-50 transition-all cursor-pointer"
                   >
-                    Ver Cuadernos 1° a 5°
+                    {landingConfig.ctaTertiaryText}
                   </button>
                 </div>
               </div>
@@ -1864,6 +1883,8 @@ export default function App() {
                     <button className={`btn text-xs font-semibold py-2 px-4 rounded-lg ${adminTab === 'courses' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAdminTab('courses')}>Cursos y Certificados</button>
                     <button className={`btn text-xs font-semibold py-2 px-4 rounded-lg ${adminTab === 'templates' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAdminTab('templates')}>Plantilla Certificado</button>
                     <button className={`btn text-xs font-semibold py-2 px-4 rounded-lg ${adminTab === 'users' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAdminTab('users')}>Docentes e Instituciones</button>
+                    <button className={`btn text-xs font-semibold py-2 px-4 rounded-lg ${adminTab === 'resources' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAdminTab('resources')}>Recursos y Documentos</button>
+                    <button className={`btn text-xs font-semibold py-2 px-4 rounded-lg ${adminTab === 'landing_cms' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAdminTab('landing_cms')}>Editar Página de Inicio</button>
                     <button className={`btn text-xs font-semibold py-2 px-4 rounded-lg ${adminTab === 'audit' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAdminTab('audit')}>Auditoría de Acciones</button>
                   </div>
 
@@ -2110,6 +2131,17 @@ export default function App() {
 
                   {adminTab === 'users' && (
                     <AdminUsersVelox />
+                  )}
+
+                  {adminTab === 'resources' && (
+                    <AdminResourcesManager />
+                  )}
+
+                  {adminTab === 'landing_cms' && (
+                    <AdminLandingEditor
+                      config={landingConfig}
+                      onConfigSaved={(next) => setLandingConfig(next)}
+                    />
                   )}
 
                   {adminTab === 'audit' && (
@@ -3115,10 +3147,10 @@ export default function App() {
       <footer className="bg-gray-950 text-gray-400 py-10 mt-auto border-t border-gray-900">
         <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <div>
-            <h4 className="font-extrabold text-white text-md">Colección Creciendo Juntos</h4>
-            <p className="text-xs text-gray-500 mt-1">Plataforma Educativa Religiosa de Secundaria</p>
+            <h4 className="font-extrabold text-white text-md">{landingConfig.footerBrandTitle}</h4>
+            <p className="text-xs text-gray-500 mt-1">{landingConfig.footerBrandSubtitle}</p>
           </div>
-          <p className="text-xs text-gray-500">derechos reservados por E. Alberto M.</p>
+          <p className="text-xs text-gray-500">{landingConfig.footerCopyright}</p>
         </div>
       </footer>
     </div>
