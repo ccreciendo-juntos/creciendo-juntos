@@ -1,3 +1,13 @@
+export interface ExperienceVideo {
+  id: string;
+  tag: string;
+  title: string;
+  desc: string;
+  duration: string;
+  bg: string;
+  videoUrl: string;
+}
+
 export interface LandingConfig {
   brandName: string;
   brandSubtitle: string;
@@ -34,6 +44,9 @@ export interface LandingConfig {
   footerBrandTitle: string;
   footerBrandSubtitle: string;
   footerCopyright: string;
+  experienceTitle: string;
+  experienceSubtitle: string;
+  experienceVideos: ExperienceVideo[];
 }
 
 export const DEFAULT_LANDING_CONFIG: LandingConfig = {
@@ -74,4 +87,35 @@ export const DEFAULT_LANDING_CONFIG: LandingConfig = {
   footerBrandTitle: 'Colección Creciendo Juntos',
   footerBrandSubtitle: 'Plataforma Educativa Religiosa de Secundaria',
   footerCopyright: 'derechos reservados por E. Alberto M.',
+  experienceTitle: 'Experiencia Creciendo Juntos en Acción',
+  experienceSubtitle: 'Fragmentos breves de nuestras sesiones dinámicas y testimonios reales.',
+  experienceVideos: [
+    {
+      id: 'vid_1',
+      tag: 'Metodología',
+      title: 'Metodología Dinámica en Aula',
+      desc: 'Estrategias activas con los cuadernos de 1° a 5°.',
+      duration: '1:20',
+      bg: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=500&auto=format&fit=crop',
+      videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
+    },
+    {
+      id: 'vid_2',
+      tag: 'Plataforma',
+      title: 'Aula Virtual Interactiva',
+      desc: 'Evaluaciones CNEB, asistencia y tareas en vivo.',
+      duration: '0:45',
+      bg: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?q=80&w=500&auto=format&fit=crop',
+      videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
+    },
+    {
+      id: 'vid_3',
+      tag: 'Testimonio',
+      title: 'Voces de Colegios Aliados',
+      desc: 'Resultados reales en valores y formación moral.',
+      duration: '2:05',
+      bg: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=500&auto=format&fit=crop',
+      videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
+    },
+  ],
 };

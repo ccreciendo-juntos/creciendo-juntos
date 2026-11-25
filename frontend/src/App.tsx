@@ -1457,74 +1457,95 @@ export default function App() {
                 </div>
               </div>
 
-              {/* REELS / VIDEO CLIPS INTERACTIVOS (COMPACTO, DINÁMICO Y PROFESIONAL) */}
+              {/* REELS / VIDEO CLIPS INTERACTIVOS (COMPACTO, DINÁMICO Y PROFESIONAL - EDITABLE POR ADMIN) */}
               <div className="max-w-5xl mx-auto space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
                   <div>
                     <span className="text-[10px] font-black uppercase tracking-widest text-[#E11D48]">Galería Multimedia</span>
-                    <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Experiencia Creciendo Juntos en Acción</h3>
+                    <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
+                      {landingConfig.experienceTitle || 'Experiencia Creciendo Juntos en Acción'}
+                    </h3>
                   </div>
-                  <p className="text-slate-500 text-xs max-w-sm">Fragmentos breves de nuestras sesiones dinámicas y testimonios reales.</p>
+                  <p className="text-slate-500 text-xs max-w-sm">
+                    {landingConfig.experienceSubtitle || 'Fragmentos breves de nuestras sesiones dinámicas y testimonios reales.'}
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {[
-                    { tag: "Metodología", title: "Metodología Dinámica en Aula", desc: "Estrategias activas con los cuadernos de 1° a 5°.", duration: "1:20", bg: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=500&auto=format&fit=crop", video: "https://www.w3schools.com/html/mov_bbb.mp4" },
-                    { tag: "Plataforma", title: "Aula Virtual Interactiva", desc: "Evaluaciones CNEB, asistencia y tareas en vivo.", duration: "0:45", bg: "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?q=80&w=500&auto=format&fit=crop", video: "https://www.w3schools.com/html/mov_bbb.mp4" },
-                    { tag: "Testimonio", title: "Voces de Colegios Aliados", desc: "Resultados reales en valores y formación moral.", duration: "2:05", bg: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=500&auto=format&fit=crop", video: "https://www.w3schools.com/html/mov_bbb.mp4" }
-                  ].map((reel, index) => (
-                    <div
-                      key={index}
-                      onClick={() => setActiveReelIndex(index)}
-                      className="group bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md hover:border-[#008080] transition-all duration-300 cursor-pointer flex flex-col"
-                    >
-                      <div className="relative h-40 overflow-hidden bg-slate-900">
-                        <img
-                          src={reel.bg}
-                          alt={reel.title}
-                          className="w-full h-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-500"
-                        />
-                        <div className="absolute inset-0 bg-slate-950/30 group-hover:bg-slate-950/15 transition-colors"></div>
-                        <span className="absolute top-2.5 left-2.5 bg-[#004D40] text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md">
-                          {reel.tag}
-                        </span>
-                        <span className="absolute top-2.5 right-2.5 bg-slate-950/80 text-white text-[10px] font-bold px-2 py-0.5 rounded-md">
-                          {reel.duration} min
-                        </span>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-11 h-11 bg-[#E11D48] group-hover:bg-[#BE123C] text-white rounded-full flex items-center justify-center shadow-lg transition-all transform group-hover:scale-110">
-                            <Play className="w-4 h-4 fill-white ml-0.5" />
+                  {(landingConfig.experienceVideos?.length ? landingConfig.experienceVideos : DEFAULT_LANDING_CONFIG.experienceVideos).map((reel, index) => {
+                    const ytMatch = (reel.videoUrl || '').match(/^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/);
+                    const ytId = ytMatch && ytMatch[2] && ytMatch[2].length === 11 ? ytMatch[2] : null;
+                    const thumbSrc = reel.bg || (ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=500&auto=format&fit=crop');
+                    return (
+                      <div
+                        key={reel.id || index}
+                        onClick={() => setActiveReelIndex(index)}
+                        className="group bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md hover:border-[#008080] transition-all duration-300 cursor-pointer flex flex-col"
+                      >
+                        <div className="relative h-40 overflow-hidden bg-slate-900">
+                          <img
+                            src={thumbSrc}
+                            alt={reel.title}
+                            className="w-full h-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-500"
+                          />
+                          <div className="absolute inset-0 bg-slate-950/30 group-hover:bg-slate-950/15 transition-colors"></div>
+                          <span className="absolute top-2.5 left-2.5 bg-[#004D40] text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md">
+                            {reel.tag}
+                          </span>
+                          <span className="absolute top-2.5 right-2.5 bg-slate-950/80 text-white text-[10px] font-bold px-2 py-0.5 rounded-md">
+                            {reel.duration} min
+                          </span>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-11 h-11 bg-[#E11D48] group-hover:bg-[#BE123C] text-white rounded-full flex items-center justify-center shadow-lg transition-all transform group-hover:scale-110">
+                              <Play className="w-4 h-4 fill-white ml-0.5" />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="p-3.5 flex-1 flex flex-col justify-between space-y-1.5">
-                        <div>
-                          <h4 className="font-extrabold text-sm text-slate-900 group-hover:text-[#008080] transition-colors leading-snug">{reel.title}</h4>
-                          <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-1">{reel.desc}</p>
+                        <div className="p-3.5 flex-1 flex flex-col justify-between space-y-1.5">
+                          <div>
+                            <h4 className="font-extrabold text-sm text-slate-900 group-hover:text-[#008080] transition-colors leading-snug">{reel.title}</h4>
+                            <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-1">{reel.desc}</p>
+                          </div>
+                          <span className="text-[11px] font-bold text-[#E11D48] inline-flex items-center gap-1 pt-1">
+                            Ver video <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                          </span>
                         </div>
-                        <span className="text-[11px] font-bold text-[#E11D48] inline-flex items-center gap-1 pt-1">
-                          Ver video <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-                        </span>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* REELS VIDEO LIGHTBOX MODAL */}
-              {activeReelIndex !== null && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
-                  <div className="relative w-full max-w-2xl bg-black rounded-2xl overflow-hidden shadow-2xl animate-scale-up">
-                    <button className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/50 hover:bg-black/75 text-white text-xl flex items-center justify-center cursor-pointer" onClick={() => setActiveReelIndex(null)}>×</button>
-                    <video 
-                      controls 
-                      autoPlay 
-                      className="w-full aspect-video object-cover" 
-                      src="https://www.w3schools.com/html/mov_bbb.mp4"
-                    ></video>
+              {/* REELS VIDEO LIGHTBOX MODAL (SOPORTA YOUTUBE EMBED Y MP4) */}
+              {activeReelIndex !== null && (() => {
+                const list = landingConfig.experienceVideos?.length ? landingConfig.experienceVideos : DEFAULT_LANDING_CONFIG.experienceVideos;
+                const currentReel = list[activeReelIndex] || list[0];
+                const ytMatch = (currentReel?.videoUrl || '').match(/^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/);
+                const ytId = ytMatch && ytMatch[2] && ytMatch[2].length === 11 ? ytMatch[2] : null;
+                return (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+                    <div className="relative w-full max-w-2xl bg-black rounded-2xl overflow-hidden shadow-2xl animate-scale-up">
+                      <button className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/60 hover:bg-black/85 text-white text-xl flex items-center justify-center cursor-pointer" onClick={() => setActiveReelIndex(null)}>×</button>
+                      {ytId ? (
+                        <iframe
+                          className="w-full aspect-video"
+                          src={`https://www.youtube.com/embed/${ytId}?autoplay=1`}
+                          title={currentReel.title}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <video 
+                          controls 
+                          autoPlay 
+                          className="w-full aspect-video object-cover" 
+                          src={currentReel?.videoUrl || 'https://www.w3schools.com/html/mov_bbb.mp4'}
+                        ></video>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* TESTIMONIALS */}
               <div id="testimonios-seccion" className="space-y-8 text-center pt-6">

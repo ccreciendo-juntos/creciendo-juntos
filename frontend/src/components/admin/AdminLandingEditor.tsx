@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Save, RotateCcw, Globe, Sparkles, CheckCircle2, MessageSquare, LayoutTemplate } from 'lucide-react';
+import { Save, RotateCcw, Globe, Sparkles, CheckCircle2, MessageSquare, LayoutTemplate, Video, Plus, Trash2 } from 'lucide-react';
 import { request } from '../../services/api';
-import { DEFAULT_LANDING_CONFIG, type LandingConfig } from './landingConfig';
+import { DEFAULT_LANDING_CONFIG, type LandingConfig, type ExperienceVideo } from './landingConfig';
+
+function getYoutubeId(url: string): string | null {
+  const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return match && match[2] && match[2].length === 11 ? match[2] : null;
+}
 
 interface AdminLandingEditorProps {
   config: LandingConfig;
@@ -214,6 +220,152 @@ export const AdminLandingEditor: React.FC<AdminLandingEditorProps> = ({ config, 
             <label className="block text-xs font-bold text-slate-700 mb-1">Texto Derechos Reservados (Footer)</label>
             <input type="text" className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl" value={form.footerCopyright} onChange={(e) => setForm({ ...form, footerCopyright: e.target.value })} />
           </div>
+        </div>
+      </div>
+
+      {/* Section 4: Galería Multimedia - Videos de YouTube */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div>
+            <h4 className="font-black text-sm text-slate-800 flex items-center gap-2">
+              <Video className="w-4 h-4 text-rose-600" /> 4. Videos de YouTube: Experiencia Creciendo Juntos en Acción
+            </h4>
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              Pega enlaces de YouTube (watch, youtu.be o Shorts); la miniatura se detecta automáticamente.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const newVid: ExperienceVideo = {
+                id: `vid_${Date.now()}`,
+                tag: 'Nuevo Video',
+                title: 'Título del Video Educativo',
+                desc: 'Descripción breve del video o testimonio.',
+                duration: '2:30',
+                bg: '',
+                videoUrl: '',
+              };
+              setForm({ ...form, experienceVideos: [...(form.experienceVideos || []), newVid] });
+            }}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 px-3.5 py-2 rounded-xl cursor-pointer shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5" /> Agregar Video de YouTube
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Título de Sección</label>
+            <input type="text" className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl" value={form.experienceTitle || ''} onChange={(e) => setForm({ ...form, experienceTitle: e.target.value })} />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Subtítulo de Sección</label>
+            <input type="text" className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl" value={form.experienceSubtitle || ''} onChange={(e) => setForm({ ...form, experienceSubtitle: e.target.value })} />
+          </div>
+        </div>
+
+        <div className="space-y-3 pt-2">
+          {(form.experienceVideos || []).map((vid, idx) => {
+            const ytId = getYoutubeId(vid.videoUrl || '');
+            const previewThumb = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : vid.bg;
+            return (
+              <div key={vid.id || idx} className="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-slate-700">Video #{idx + 1}</span>
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, experienceVideos: form.experienceVideos.filter((_, i) => i !== idx) })}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-600 hover:text-rose-700 cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" /> Eliminar
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start">
+                  {previewThumb && (
+                    <div className="md:col-span-3 rounded-lg overflow-hidden border border-slate-200 bg-slate-900 aspect-video">
+                      <img src={previewThumb} alt={vid.title} className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  <div className={`${previewThumb ? 'md:col-span-9' : 'md:col-span-12'} grid grid-cols-1 sm:grid-cols-3 gap-2.5`}>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Etiqueta</label>
+                      <input
+                        type="text"
+                        className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg"
+                        value={vid.tag}
+                        onChange={(e) => {
+                          const next = [...form.experienceVideos];
+                          next[idx] = { ...vid, tag: e.target.value };
+                          setForm({ ...form, experienceVideos: next });
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Título del Video</label>
+                      <input
+                        type="text"
+                        className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg"
+                        value={vid.title}
+                        onChange={(e) => {
+                          const next = [...form.experienceVideos];
+                          next[idx] = { ...vid, title: e.target.value };
+                          setForm({ ...form, experienceVideos: next });
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Duración (ej. 3:15)</label>
+                      <input
+                        type="text"
+                        className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg"
+                        value={vid.duration}
+                        onChange={(e) => {
+                          const next = [...form.experienceVideos];
+                          next[idx] = { ...vid, duration: e.target.value };
+                          setForm({ ...form, experienceVideos: next });
+                        }}
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Enlace de YouTube (o MP4)</label>
+                      <input
+                        type="text"
+                        placeholder="https://www.youtube.com/watch?v=..."
+                        className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg"
+                        value={vid.videoUrl}
+                        onChange={(e) => {
+                          const url = e.target.value;
+                          const detectedId = getYoutubeId(url);
+                          const next = [...form.experienceVideos];
+                          next[idx] = {
+                            ...vid,
+                            videoUrl: url,
+                            bg: detectedId ? `https://img.youtube.com/vi/${detectedId}/hqdefault.jpg` : vid.bg,
+                          };
+                          setForm({ ...form, experienceVideos: next });
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Descripción breve</label>
+                      <input
+                        type="text"
+                        className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg"
+                        value={vid.desc}
+                        onChange={(e) => {
+                          const next = [...form.experienceVideos];
+                          next[idx] = { ...vid, desc: e.target.value };
+                          setForm({ ...form, experienceVideos: next });
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </form>
