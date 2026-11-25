@@ -29,6 +29,9 @@ interface TeacherVeloxDashboardProps {
     name: string;
     email: string;
     role: string;
+    institution_name?: string;
+    institution_id?: string;
+    assigned_sections?: string[];
   };
   onReturnToPlatform?: () => void;
   // If user wants to see the original classroom materials & assignments
@@ -473,6 +476,8 @@ export const TeacherVeloxDashboard: React.FC<TeacherVeloxDashboardProps> = ({
             students={students}
             selectedGrade={selectedGrade}
             selectedSection={selectedSection}
+            institutionName={user.institution_name || '7053 Reino de España'}
+            teacherName={teacherProfile.name}
             onGradeChange={(g, s) => {
               setSelectedGrade(g);
               setSelectedSection(s);
@@ -496,6 +501,7 @@ export const TeacherVeloxDashboard: React.FC<TeacherVeloxDashboardProps> = ({
             selectedGrade={selectedGrade}
             selectedSection={selectedSection}
             teacherName={teacherProfile.name}
+            institutionName={user.institution_name || '7053 Reino de España'}
           />
         )}
 

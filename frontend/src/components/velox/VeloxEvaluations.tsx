@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { Save, Download, Upload, Search, CheckCircle2 } from 'lucide-react';
+import ExcelJS from 'exceljs';
 import type { StudentRecord, GradeValue } from './types';
 import { 
   RELIGION_AREA_NAME, 
@@ -10,18 +11,24 @@ import {
   getGradeBadgeClass,
   getGradeTextClass 
 } from './religionCompetencies';
+import { exportCurrentSectionExcel, exportAllSectionsExcel, type ExcelSectionPayload } from './veloxExcelExport';
 
 interface VeloxEvaluationsProps {
   students: StudentRecord[];
   selectedGrade: number;
   selectedSection: string;
   onGradeChange?: (grade: number, section: string) => void;
+  institutionName?: string;
+  teacherName?: string;
 }
 
 export const VeloxEvaluations: React.FC<VeloxEvaluationsProps> = ({
   students,
   selectedGrade,
   selectedSection,
+  onGradeChange,
+  institutionName = '7053 Reino de España',
+  teacherName = 'Prof. Carlos Mendoza',
 }) => {
   const [bimestre, setBimestre] = useState<'I' | 'II' | 'III' | 'IV'>('IV');
   const [searchQuery, setSearchQuery] = useState('');
@@ -156,90 +163,143 @@ export const VeloxEvaluations: React.FC<VeloxEvaluationsProps> = ({
     });
   };
 
-  // Export current table to Excel format (.xls compatible)
-  const exportToExcel = () => {
-    let html = `
-      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-      <head>
-        <meta charset="utf-8" />
-        <style>
-          table { border-collapse: collapse; font-family: Arial, sans-serif; }
-          th, td { border: 1px solid #999; padding: 6px; text-align: center; }
-          .header-main { background-color: #004D40; color: white; font-weight: bold; }
-          .c1-hdr { background-color: #2563EB; color: white; }
-          .c2-hdr { background-color: #EA580C; color: white; }
-          .logro { background-color: #FEF3C7; font-weight: bold; }
-          .logro-final { background-color: #F97316; color: white; font-weight: bold; }
-        </style>
-      </head>
-      <body>
-        <h2>REGISTRO AUXILIAR DE EVALUACIÓN - ÁREA DE EDUCACIÓN RELIGIOSA 2026</h2>
-        <p><strong>Grado:</strong> ${selectedGrade}° de Secundaria | <strong>Sección:</strong> "${selectedSection}" | <strong>Bimestre:</strong> ${bimestre} Bimestre</p>
-        <table>
-          <thead>
-            <tr>
-              <th rowspan="2">N°</th>
-              <th rowspan="2">DNI</th>
-              <th rowspan="2">Apellidos y Nombres</th>
-              <th colspan="3" class="c1-hdr">Construye su identidad como persona humana...</th>
-              <th colspan="3" class="c2-hdr">Asume la experiencia del encuentro con Dios...</th>
-              <th rowspan="2" class="logro-final">LOGRO FINAL</th>
-            </tr>
-            <tr>
-              <th>Cap 1</th>
-              <th>Cap 2</th>
-              <th class="logro">LOGRO</th>
-              <th>Cap 1</th>
-              <th>Cap 2</th>
-              <th class="logro">LOGRO</th>
-            </tr>
-          </thead>
-          <tbody>
-    `;
+  const fileImportRef = useRef<HTMLInputElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
-    filteredStudents.forEach((st, idx) => {
-      const stGrades = grades[st.id] || {};
-      const c1Cap1 = stGrades['rel_c1_cap1'] || '';
-      const c1Cap2 = stGrades['rel_c1_cap2'] || '';
-      const c1Logro = calculateCompetencyAverage([c1Cap1, c1Cap2]);
-
-      const c2Cap1 = stGrades['rel_c2_cap1'] || '';
-      const c2Cap2 = stGrades['rel_c2_cap2'] || '';
-      const c2Logro = calculateCompetencyAverage([c2Cap1, c2Cap2]);
-
-      const finalGrade = calculateFinalGrade([c1Logro, c2Logro]);
-
-      html += `
-        <tr>
-          <td>${idx + 1}</td>
-          <td>${st.dni}</td>
-          <td style="text-align: left;">${st.fullName}</td>
-          <td>${c1Cap1}</td>
-          <td>${c1Cap2}</td>
-          <td class="logro"><strong>${c1Logro}</strong></td>
-          <td>${c2Cap1}</td>
-          <td>${c2Cap2}</td>
-          <td class="logro"><strong>${c2Logro}</strong></td>
-          <td class="logro-final"><strong>${finalGrade}</strong></td>
-        </tr>
-      `;
-    });
-
-    html += `</tbody></table></body></html>`;
-
-    const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Registro_Evaluacion_Religiosa_${selectedGrade}${selectedSection}_${bimestre}Bimestre.xls`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  // Export current section to official Excel (.xlsx) with formulas, cell protection, A4 landscape
+  const handleExportCurrent = async () => {
+    setIsExporting(true);
+    try {
+      await exportCurrentSectionExcel({
+        grade: selectedGrade,
+        section: selectedSection,
+        bimestre,
+        students: filteredStudents,
+        grades,
+        institutionName,
+        teacherName,
+        academicYear: '2026',
+      });
+    } finally {
+      setIsExporting(false);
+    }
   };
+
+  // Export ALL grades/sections into a multi-sheet official Excel (.xlsx)
+  const handleExportAll = async () => {
+    setIsExporting(true);
+    try {
+      const uniqueClassrooms = Array.from(
+        new Set(students.map(s => `${s.grade}|${s.section}`))
+      ).sort();
+
+      const sectionsPayload: ExcelSectionPayload[] = uniqueClassrooms.map(key => {
+        const [gStr, sec] = key.split('|');
+        const gNum = Number(gStr);
+        const secStudents = students.filter(s => s.grade === gNum && s.section === sec);
+        const secKey = `velox_eval_rel_${gNum}_${sec}_${bimestre}`;
+        let secGrades: Record<string, Record<string, GradeValue>> = {};
+        if (gNum === selectedGrade && sec === selectedSection) {
+          secGrades = grades;
+        } else {
+          try {
+            const raw = localStorage.getItem(secKey);
+            if (raw) secGrades = JSON.parse(raw);
+          } catch {
+            // ignore
+          }
+        }
+        return {
+          grade: gNum,
+          section: sec,
+          bimestre,
+          students: secStudents,
+          grades: secGrades,
+          institutionName,
+          teacherName,
+          academicYear: '2026',
+        };
+      });
+
+      await exportAllSectionsExcel(sectionsPayload);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // Import grades from an uploaded .xlsx file
+  const handleImportExcelFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const buffer = await file.arrayBuffer();
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(buffer);
+      const sheet = workbook.worksheets[0];
+      if (!sheet) return;
+
+      const capCols = [
+        { col: 3, id: 'rel_c1_cap1' },
+        { col: 4, id: 'rel_c1_cap2' },
+        { col: 6, id: 'rel_c2_cap1' },
+        { col: 7, id: 'rel_c2_cap2' },
+        { col: 10, id: 'trans_c1_cap1' },
+        { col: 11, id: 'trans_c1_cap2' },
+        { col: 12, id: 'trans_c1_cap3' },
+        { col: 13, id: 'trans_c1_cap4' },
+        { col: 15, id: 'trans_c2_cap1' },
+        { col: 16, id: 'trans_c2_cap2' },
+        { col: 17, id: 'trans_c2_cap3' },
+      ];
+
+      let importedCount = 0;
+      setGrades(prev => {
+        const next = { ...prev };
+        sheet.eachRow((row, rowNumber) => {
+          if (rowNumber < 7) return;
+          const nameCell = String(row.getCell(2).value || '').trim().toUpperCase();
+          if (!nameCell) return;
+          const st = filteredStudents.find(s => s.fullName.toUpperCase() === nameCell) || filteredStudents[rowNumber - 7];
+          if (!st) return;
+
+          const stObj = { ...(next[st.id] || {}) };
+          let changed = false;
+          capCols.forEach(({ col, id }) => {
+            const rawVal = String(row.getCell(col).value || '').trim().toUpperCase();
+            if (rawVal === 'AD' || rawVal === 'A' || rawVal === 'B' || rawVal === 'C') {
+              stObj[id] = rawVal as GradeValue;
+              changed = true;
+            }
+          });
+          if (changed) {
+            next[st.id] = stObj;
+            importedCount++;
+          }
+        });
+        return next;
+      });
+      alert(`Se importaron calificaciones para ${importedCount} estudiantes.`);
+    } catch (err) {
+      alert('No se pudo leer el archivo Excel. Verifique que sea un formato .xlsx válido.');
+      console.error(err);
+    } finally {
+      if (fileImportRef.current) fileImportRef.current.value = '';
+    }
+  };
+
+  // Unique grade+section options from student list
+  const classroomOptions = useMemo(() => {
+    const set = new Set<string>(students.map(s => `${s.grade}|${s.section}`));
+    set.add(`${selectedGrade}|${selectedSection}`);
+    return Array.from(set).sort().map(item => {
+      const [g, s] = item.split('|');
+      return { grade: Number(g), section: s };
+    });
+  }, [students, selectedGrade, selectedSection]);
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Top Header & Actions Bar */}
+      {/* Top Header & Actions Bar (Matching Image 2) */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
         <div>
           <div className="flex items-center gap-2">
@@ -254,41 +314,50 @@ export const VeloxEvaluations: React.FC<VeloxEvaluationsProps> = ({
         <div className="flex flex-wrap items-center gap-2">
           {saveSuccessMsg && (
             <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 font-bold bg-emerald-50 px-3 py-2 rounded-xl border border-emerald-200 animate-fade-in">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" /> ¡Guardado correctamente!
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" /> ¡Guardado!
             </span>
           )}
 
+          <input
+            ref={fileImportRef}
+            type="file"
+            accept=".xlsx"
+            onChange={handleImportExcelFile}
+            className="hidden"
+          />
+
           <button 
             type="button"
-            onClick={exportToExcel}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3.5 py-2 rounded-xl transition-all shadow-xs cursor-pointer"
+            onClick={() => fileImportRef.current?.click()}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2.5 rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer"
           >
-            <Download className="w-4 h-4 text-emerald-600" /> Exportar Actual (Excel)
+            <Upload className="w-4 h-4" /> Importar
           </button>
 
           <button 
             type="button"
-            onClick={() => {
-              const pasted = prompt("Pegue aquí los datos copiados desde Excel (separados por tabulación):");
-              if (pasted && filteredStudents[0]) {
-                const fakeEvent = {
-                  preventDefault: () => {},
-                  clipboardData: { getData: () => pasted }
-                } as unknown as React.ClipboardEvent<HTMLInputElement>;
-                handlePasteAcrossCells(fakeEvent, 0, 'rel_c1_cap1');
-              }
-            }}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-3.5 py-2 rounded-xl transition-all shadow-xs cursor-pointer"
+            disabled={isExporting}
+            onClick={handleExportCurrent}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 px-4 py-2.5 rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer disabled:opacity-50"
           >
-            <Upload className="w-4 h-4 text-indigo-600" /> Importar desde Excel
+            <Download className="w-4 h-4" /> Exportar Actual
+          </button>
+
+          <button 
+            type="button"
+            disabled={isExporting}
+            onClick={handleExportAll}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer disabled:opacity-50"
+          >
+            <Download className="w-4 h-4" /> Exportar Todo
           </button>
 
           <button 
             type="button"
             onClick={handleSave}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl transition-all shadow-sm shadow-blue-500/20 active:scale-95 cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-sky-500 hover:bg-sky-600 px-4 py-2.5 rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer"
           >
-            <Save className="w-4 h-4" /> Guardar Notas
+            <Save className="w-4 h-4" /> Guardar
           </button>
         </div>
       </div>
@@ -296,7 +365,7 @@ export const VeloxEvaluations: React.FC<VeloxEvaluationsProps> = ({
       {/* Filters & Control Ribbon */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
         <div>
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Área Curricular</label>
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Área</label>
           <div className="form-control text-xs font-bold text-blue-900 bg-blue-50/60 border border-blue-200 py-2 px-3 rounded-xl">
             ✝ {RELIGION_AREA_NAME}
           </div>
@@ -317,10 +386,27 @@ export const VeloxEvaluations: React.FC<VeloxEvaluationsProps> = ({
         </div>
 
         <div>
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Grado y Sección</label>
-          <div className="form-control text-xs font-semibold py-2 px-3 rounded-xl border border-slate-300 w-full bg-slate-50 text-slate-700">
-            {selectedGrade}° de Secundaria - Sección "{selectedSection}"
-          </div>
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Grado</label>
+          {onGradeChange ? (
+            <select
+              value={`${selectedGrade}|${selectedSection}`}
+              onChange={e => {
+                const [g, s] = e.target.value.split('|');
+                onGradeChange(Number(g), s);
+              }}
+              className="form-control text-xs font-semibold py-2 px-3 rounded-xl border border-slate-300 w-full bg-white focus:ring-2 focus:ring-blue-500"
+            >
+              {classroomOptions.map(opt => (
+                <option key={`${opt.grade}|${opt.section}`} value={`${opt.grade}|${opt.section}`}>
+                  {opt.grade}° {opt.section} - Secundaria
+                </option>
+              ))}
+            </select>
+          ) : (
+            <div className="form-control text-xs font-semibold py-2 px-3 rounded-xl border border-slate-300 w-full bg-slate-50 text-slate-700">
+              {selectedGrade}° {selectedSection} - Secundaria
+            </div>
+          )}
         </div>
 
         <div>

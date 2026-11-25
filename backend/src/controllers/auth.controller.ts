@@ -86,8 +86,11 @@ export const login = async (req: AuthenticatedRequest, res: Response) => {
 
   try {
     const user = await getOne(
-      `SELECT u.*, ur.role_id as role FROM users u
+      `SELECT u.*, ur.role_id as role, tp.school_id as institution_id, s.name as institution_name, tp.specialty
+       FROM users u
        JOIN user_roles ur ON u.id = ur.user_id
+       LEFT JOIN teacher_profiles tp ON u.id = tp.user_id
+       LEFT JOIN schools s ON tp.school_id = s.id
        WHERE u.email = ?`,
       [email]
     );
@@ -128,7 +131,10 @@ export const login = async (req: AuthenticatedRequest, res: Response) => {
           role: user.role,
           phone: user.phone,
           document_type: user.document_type,
-          document_number: user.document_number
+          document_number: user.document_number,
+          institution_id: user.institution_id || null,
+          institution_name: user.institution_name || null,
+          specialty: user.specialty || null
         }
       }
     });
@@ -151,9 +157,12 @@ export const me = async (req: AuthenticatedRequest, res: Response) => {
 
   try {
     const user = await getOne(
-      `SELECT u.id, u.name, u.email, u.phone, u.document_type, u.document_number, u.status, ur.role_id as role
+      `SELECT u.id, u.name, u.email, u.phone, u.document_type, u.document_number, u.status, ur.role_id as role,
+              tp.school_id as institution_id, s.name as institution_name, tp.specialty
        FROM users u
        JOIN user_roles ur ON u.id = ur.user_id
+       LEFT JOIN teacher_profiles tp ON u.id = tp.user_id
+       LEFT JOIN schools s ON tp.school_id = s.id
        WHERE u.id = ?`,
       [req.user.id]
     );

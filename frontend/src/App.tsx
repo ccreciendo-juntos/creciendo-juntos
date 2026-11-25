@@ -10,6 +10,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { jsPDF } from 'jspdf';
 import { request } from './services/api';
 import { TeacherVeloxDashboard } from './components/velox/TeacherVeloxDashboard';
+import { AdminUsersVelox } from './components/velox/AdminUsersVelox';
 import { NovaClassworkManager } from './components/nova/NovaClassworkManager';
 
 // Interface types
@@ -23,6 +24,9 @@ interface UserData {
   document_number?: string;
   grade?: number;
   section?: string;
+  institution_id?: string;
+  institution_name?: string;
+  specialty?: string;
 }
 
 interface Book {
@@ -94,7 +98,7 @@ export default function App() {
   const [courseSearch, setCourseSearch] = useState('');
 
   // Tab Navigation States
-  const [adminTab, setAdminTab] = useState<'metrics' | 'books' | 'orders' | 'courses' | 'templates' | 'audit'>('metrics');
+  const [adminTab, setAdminTab] = useState<'metrics' | 'books' | 'orders' | 'courses' | 'templates' | 'users' | 'audit'>('metrics');
 
   // Cart State
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -1859,6 +1863,7 @@ export default function App() {
                     <button className={`btn text-xs font-semibold py-2 px-4 rounded-lg ${adminTab === 'orders' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAdminTab('orders')}>Pedidos y Pagos</button>
                     <button className={`btn text-xs font-semibold py-2 px-4 rounded-lg ${adminTab === 'courses' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAdminTab('courses')}>Cursos y Certificados</button>
                     <button className={`btn text-xs font-semibold py-2 px-4 rounded-lg ${adminTab === 'templates' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAdminTab('templates')}>Plantilla Certificado</button>
+                    <button className={`btn text-xs font-semibold py-2 px-4 rounded-lg ${adminTab === 'users' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAdminTab('users')}>Docentes e Instituciones</button>
                     <button className={`btn text-xs font-semibold py-2 px-4 rounded-lg ${adminTab === 'audit' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAdminTab('audit')}>Auditoría de Acciones</button>
                   </div>
 
@@ -2103,6 +2108,10 @@ export default function App() {
                     </div>
                   )}
 
+                  {adminTab === 'users' && (
+                    <AdminUsersVelox />
+                  )}
+
                   {adminTab === 'audit' && (
                     <div className="space-y-4 animate-fade-in">
                       <h3 className="font-bold text-xl text-gray-800">Log de Auditoría del Sistema</h3>
@@ -2137,7 +2146,7 @@ export default function App() {
               )}
 
               {/* TEACHER VIEW (VELOX REGEVA 2026 - ÁREA EDUCACIÓN RELIGIOSA) */}
-              {user.role === 'docente' && (
+              {['docente', 'subdirector', 'auxiliar', 'admin_institucional'].includes(user.role) && (
                 <TeacherVeloxDashboard
                   user={user}
                   onReturnToPlatform={() => setCurrentView('landing')}

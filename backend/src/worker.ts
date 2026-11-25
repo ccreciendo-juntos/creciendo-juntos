@@ -9,6 +9,7 @@ import { createOrder, registerManualPayment, checkoutCard, approvePayment, rejec
 import { listCourses, getCourseDetails, createCourse, getStudentCourses, completeLesson, generateCertificate, verifyCertificatePublic, createModule, createLesson, updateCourse, deleteCourse, registerCourseParticipant, importCourseParticipants } from './controllers/courses.controller';
 import { createClassroom, listClassrooms, registerStudent, importStudents, getClassroomProgress, createAssessment, submitAssessment, gradeAssessment, getClassroomAssessments, getAssessmentDetails, getAssessmentSubmissions, getStudentAssessments } from './controllers/classrooms.controller';
 import { getAdminMetrics, getAuditLogs } from './controllers/reports.controller';
+import { listSchools, createSchool, listAdminUsers, createAdminUser, updateAdminUser, deleteAdminUser } from './controllers/adminUsers.controller';
 
 // JWT verification wrapper using jsonwebtoken with nodejs_compat
 import jwt from 'jsonwebtoken';
@@ -218,6 +219,14 @@ app.get('/api/v1/certificates/verify/:code', expressToHono(verifyCertificatePubl
 // 8. Reportes y Auditoría
 app.get('/api/v1/admin/metrics', expressToHono(getAdminMetrics, true, ['admin', 'super_admin']));
 app.get('/api/v1/admin/audit-logs', expressToHono(getAuditLogs, true, ['admin', 'super_admin']));
+
+// 9. Gestión de Instituciones y Usuarios Docentes (Admin / Super Admin)
+app.get('/api/v1/admin/schools', expressToHono(listSchools, true, ['admin', 'super_admin', 'admin_institucional']));
+app.post('/api/v1/admin/schools', expressToHono(createSchool, true, ['admin', 'super_admin']));
+app.get('/api/v1/admin/users', expressToHono(listAdminUsers, true, ['admin', 'super_admin', 'admin_institucional']));
+app.post('/api/v1/admin/users', expressToHono(createAdminUser, true, ['admin', 'super_admin', 'admin_institucional']));
+app.put('/api/v1/admin/users/:id', expressToHono(updateAdminUser, true, ['admin', 'super_admin', 'admin_institucional']));
+app.delete('/api/v1/admin/users/:id', expressToHono(deleteAdminUser, true, ['admin', 'super_admin', 'admin_institucional']));
 
 // Root and Health Check
 app.all('/', (c) => {
