@@ -205,10 +205,6 @@ export const AdminLandingEditor: React.FC<AdminLandingEditorProps> = ({ config, 
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Título Sección Simulacros</label>
-            <input type="text" className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl" value={form.simulacroTitle} onChange={(e) => setForm({ ...form, simulacroTitle: e.target.value })} />
-          </div>
-          <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">Botón WhatsApp Flotante</label>
             <input type="text" className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl" value={form.whatsappLabel} onChange={(e) => setForm({ ...form, whatsappLabel: e.target.value })} />
           </div>
@@ -216,9 +212,98 @@ export const AdminLandingEditor: React.FC<AdminLandingEditorProps> = ({ config, 
             <label className="block text-xs font-bold text-slate-700 mb-1">Título Pie de Página (Footer)</label>
             <input type="text" className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl" value={form.footerBrandTitle} onChange={(e) => setForm({ ...form, footerBrandTitle: e.target.value })} />
           </div>
-          <div>
+          <div className="md:col-span-2">
             <label className="block text-xs font-bold text-slate-700 mb-1">Texto Derechos Reservados (Footer)</label>
             <input type="text" className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl" value={form.footerCopyright} onChange={(e) => setForm({ ...form, footerCopyright: e.target.value })} />
+          </div>
+        </div>
+      </div>
+
+      {/* Section 3B: Sección Simulacros 100% Personalizable */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+        <h4 className="font-black text-sm text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-2">
+          <Sparkles className="w-4 h-4 text-amber-500" /> 3B. Sección Simulacros (100% Personalizable)
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Insignia Amarilla (Badge)</label>
+            <input type="text" className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl font-bold" value={form.simulacroBadge} onChange={(e) => setForm({ ...form, simulacroBadge: e.target.value })} />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Título Principal Simulacros</label>
+            <input type="text" className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl font-bold" value={form.simulacroTitle} onChange={(e) => setForm({ ...form, simulacroTitle: e.target.value })} />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Texto del Botón CTA</label>
+            <input type="text" className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl font-bold" value={form.simulacroButton} onChange={(e) => setForm({ ...form, simulacroButton: e.target.value })} />
+          </div>
+          <div className="md:col-span-3">
+            <label className="block text-xs font-bold text-slate-700 mb-1">Descripción de Simulacros</label>
+            <textarea rows={2} className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl" value={form.simulacroDesc} onChange={(e) => setForm({ ...form, simulacroDesc: e.target.value })} />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-1">
+          <div>
+            <label className="block text-[10px] font-bold text-slate-600 mb-1">Beneficio 1</label>
+            <input type="text" className="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg" value={form.simulacroFeat1} onChange={(e) => setForm({ ...form, simulacroFeat1: e.target.value })} />
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold text-slate-600 mb-1">Beneficio 2</label>
+            <input type="text" className="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg" value={form.simulacroFeat2} onChange={(e) => setForm({ ...form, simulacroFeat2: e.target.value })} />
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold text-slate-600 mb-1">Beneficio 3</label>
+            <input type="text" className="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg" value={form.simulacroFeat3} onChange={(e) => setForm({ ...form, simulacroFeat3: e.target.value })} />
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold text-slate-600 mb-1">Beneficio 4</label>
+            <input type="text" className="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg" value={form.simulacroFeat4} onChange={(e) => setForm({ ...form, simulacroFeat4: e.target.value })} />
+          </div>
+        </div>
+
+        <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+          <p className="text-[11px] font-black text-slate-700 uppercase">Tarjeta Lateral Derecha (Métricas y Progreso)</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-bold text-slate-600 mb-1">Etiqueta Superior Tarjeta</label>
+              <input type="text" className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg" value={form.simulacroCardBadge} onChange={(e) => setForm({ ...form, simulacroCardBadge: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold text-slate-600 mb-1">Etiqueta Derecha (ej. CNEB • MINEDU)</label>
+              <input type="text" className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg" value={form.simulacroCardTag} onChange={(e) => setForm({ ...form, simulacroCardTag: e.target.value })} />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-[10px] font-bold text-slate-600 mb-1">Métrica 1 (Valor / Etiqueta)</label>
+              <input type="text" className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg font-bold" value={form.simulacroMetric1Val} onChange={(e) => setForm({ ...form, simulacroMetric1Val: e.target.value })} />
+              <input type="text" className="w-full px-2.5 py-1 text-[11px] bg-white border border-slate-200 rounded-lg mt-1" value={form.simulacroMetric1Lbl} onChange={(e) => setForm({ ...form, simulacroMetric1Lbl: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold text-slate-600 mb-1">Métrica 2 (Valor / Etiqueta)</label>
+              <input type="text" className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg font-bold" value={form.simulacroMetric2Val} onChange={(e) => setForm({ ...form, simulacroMetric2Val: e.target.value })} />
+              <input type="text" className="w-full px-2.5 py-1 text-[11px] bg-white border border-slate-200 rounded-lg mt-1" value={form.simulacroMetric2Lbl} onChange={(e) => setForm({ ...form, simulacroMetric2Lbl: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold text-slate-600 mb-1">Métrica 3 (Valor / Etiqueta)</label>
+              <input type="text" className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg font-bold" value={form.simulacroMetric3Val} onChange={(e) => setForm({ ...form, simulacroMetric3Val: e.target.value })} />
+              <input type="text" className="w-full px-2.5 py-1 text-[11px] bg-white border border-slate-200 rounded-lg mt-1" value={form.simulacroMetric3Lbl} onChange={(e) => setForm({ ...form, simulacroMetric3Lbl: e.target.value })} />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-[10px] font-bold text-slate-600 mb-1">Texto Progreso Izquierda</label>
+              <input type="text" className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg" value={form.simulacroProgressLabel} onChange={(e) => setForm({ ...form, simulacroProgressLabel: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold text-slate-600 mb-1">Texto Progreso Derecha</label>
+              <input type="text" className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg" value={form.simulacroProgressText} onChange={(e) => setForm({ ...form, simulacroProgressText: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold text-slate-600 mb-1">Porcentaje Barra (0-100)</label>
+              <input type="number" min={0} max={100} className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg font-bold" value={form.simulacroProgressPct} onChange={(e) => setForm({ ...form, simulacroProgressPct: Math.min(100, Math.max(0, Number(e.target.value))) })} />
+            </div>
           </div>
         </div>
       </div>

@@ -1407,10 +1407,10 @@ export default function App() {
                       {landingConfig.simulacroDesc}
                     </p>
                     <ul className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px] text-white pt-1 font-medium">
-                      <li className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-[#34D399] shrink-0" /> Cronómetro por módulo</li>
-                      <li className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-[#34D399] shrink-0" /> Calificación sobre 20</li>
-                      <li className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-[#34D399] shrink-0" /> Clases de resolución</li>
-                      <li className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-[#34D399] shrink-0" /> Ranking institucional</li>
+                      <li className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-[#34D399] shrink-0" /> {landingConfig.simulacroFeat1}</li>
+                      <li className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-[#34D399] shrink-0" /> {landingConfig.simulacroFeat2}</li>
+                      <li className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-[#34D399] shrink-0" /> {landingConfig.simulacroFeat3}</li>
+                      <li className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-[#34D399] shrink-0" /> {landingConfig.simulacroFeat4}</li>
                     </ul>
                     <div className="pt-2">
                       <button 
@@ -1426,31 +1426,31 @@ export default function App() {
                   <div className="lg:col-span-5 bg-white text-slate-900 rounded-xl p-4 shadow-sm border border-slate-200 space-y-3">
                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                       <span className="text-[10px] font-black uppercase tracking-wider text-[#008080] bg-teal-50 px-2 py-0.5 rounded">
-                        Simulacro Activo 2026
+                        {landingConfig.simulacroCardBadge}
                       </span>
-                      <span className="text-[11px] font-bold text-slate-500">CNEB • MINEDU</span>
+                      <span className="text-[11px] font-bold text-slate-500">{landingConfig.simulacroCardTag}</span>
                     </div>
                     <div className="grid grid-cols-3 gap-2 text-center">
                       <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
-                        <span className="block text-sm font-black text-slate-900">25 min</span>
-                        <span className="text-[9px] font-bold text-slate-500 uppercase">Duración</span>
+                        <span className="block text-sm font-black text-slate-900">{landingConfig.simulacroMetric1Val}</span>
+                        <span className="text-[9px] font-bold text-slate-500 uppercase">{landingConfig.simulacroMetric1Lbl}</span>
                       </div>
                       <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
-                        <span className="block text-sm font-black text-[#008080]">20 pts</span>
-                        <span className="text-[9px] font-bold text-slate-500 uppercase">Escala</span>
+                        <span className="block text-sm font-black text-[#008080]">{landingConfig.simulacroMetric2Val}</span>
+                        <span className="text-[9px] font-bold text-slate-500 uppercase">{landingConfig.simulacroMetric2Lbl}</span>
                       </div>
                       <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
-                        <span className="block text-sm font-black text-[#E11D48]">En Vivo</span>
-                        <span className="text-[9px] font-bold text-slate-500 uppercase">Feedback</span>
+                        <span className="block text-sm font-black text-[#E11D48]">{landingConfig.simulacroMetric3Val}</span>
+                        <span className="text-[9px] font-bold text-slate-500 uppercase">{landingConfig.simulacroMetric3Lbl}</span>
                       </div>
                     </div>
                     <div className="space-y-1">
                       <div className="flex justify-between text-[10px] font-bold text-slate-600">
-                        <span>Participación Docente 2026</span>
-                        <span className="text-[#008080]">94% Aprobación</span>
+                        <span>{landingConfig.simulacroProgressLabel}</span>
+                        <span className="text-[#008080]">{landingConfig.simulacroProgressText}</span>
                       </div>
                       <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-[#008080] w-[94%] rounded-full"></div>
+                        <div className="h-full bg-[#008080] rounded-full transition-all" style={{ width: `${landingConfig.simulacroProgressPct ?? 94}%` }}></div>
                       </div>
                     </div>
                   </div>

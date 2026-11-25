@@ -41,6 +41,21 @@ export interface LandingConfig {
   simulacroTitle: string;
   simulacroDesc: string;
   simulacroButton: string;
+  simulacroFeat1: string;
+  simulacroFeat2: string;
+  simulacroFeat3: string;
+  simulacroFeat4: string;
+  simulacroCardBadge: string;
+  simulacroCardTag: string;
+  simulacroMetric1Val: string;
+  simulacroMetric1Lbl: string;
+  simulacroMetric2Val: string;
+  simulacroMetric2Lbl: string;
+  simulacroMetric3Val: string;
+  simulacroMetric3Lbl: string;
+  simulacroProgressLabel: string;
+  simulacroProgressText: string;
+  simulacroProgressPct: number;
   footerBrandTitle: string;
   footerBrandSubtitle: string;
   footerCopyright: string;
@@ -84,6 +99,21 @@ export const DEFAULT_LANDING_CONFIG: LandingConfig = {
   simulacroDesc:
     'Evalúa tus conocimientos pedagógicos y disciplinares en tiempo real con retroalimentación instantánea y ranking nacional.',
   simulacroButton: 'Empezar Simulacro Gratuito',
+  simulacroFeat1: 'Cronómetro por módulo',
+  simulacroFeat2: 'Calificación sobre 20',
+  simulacroFeat3: 'Clases de resolución',
+  simulacroFeat4: 'Ranking institucional',
+  simulacroCardBadge: 'Simulacro Activo 2026',
+  simulacroCardTag: 'CNEB • MINEDU',
+  simulacroMetric1Val: '25 min',
+  simulacroMetric1Lbl: 'Duración',
+  simulacroMetric2Val: '20 pts',
+  simulacroMetric2Lbl: 'Escala',
+  simulacroMetric3Val: 'En Vivo',
+  simulacroMetric3Lbl: 'Feedback',
+  simulacroProgressLabel: 'Participación Docente 2026',
+  simulacroProgressText: '94% Aprobación',
+  simulacroProgressPct: 94,
   footerBrandTitle: 'Colección Creciendo Juntos',
   footerBrandSubtitle: 'Plataforma Educativa Religiosa de Secundaria',
   footerCopyright: 'derechos reservados por E. Alberto M.',
